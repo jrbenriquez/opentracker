@@ -3,8 +3,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-
-from tracker.constants.back_office import BACK_OFFICE_DICT
+from django.db.models.signals import pre_save, post_save
 
 # Create your models here.
 class Team(models.Model):
@@ -15,40 +14,6 @@ class Team(models.Model):
     
     def __str__(self):
         return self.name
-        
-
-class Event(models.Model):
-    timestamp_start = models.DateTimeField(auto_now_add=True)
-    timestamp_pause = models.DateTimeField(blank=True, null=True)
-    timestamp_end = models.DateTimeField(blank=True, null=True)
-    timestamp_updated = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=30,
-                              choices=BACK_OFFICE_DICT['status'],
-                              default=BACK_OFFICE_DICT['status'][0][0],
-                              null=True
-                              )
-    date_due = models.DateTimeField(blank=True, null=True)
-    agent = models.ForeignKey(settings.AUTH_USER_MODEL)
-    task_type = models.CharField(max_length=30, choices=BACK_OFFICE_DICT['task_types'])
-    task_sub_type = models.CharField(max_length=30, choices=BACK_OFFICE_DICT['task_sub_types'])
-    ticket_link = models.CharField(max_length=300)
-    ticket_name = models.CharField(max_length=100)
-    quantity = models.IntegerField()
-    team = models.ForeignKey(Team)
-    
-    def __str__(self):
-        return '[%s] %s' % (self.id, self.ticket_name)
-    @property
-    def get_task_type(self):
-        return dict(BACK_OFFICE_DICT['task_types']).get(self.task_type)
-    @property
-    def get_task_sub_type(self):
-        return dict(BACK_OFFICE_DICT['task_sub_types']).get(self.task_sub_type)
-
-    @property
-    def get_first_name(self):
-        agent = User.objets.get(pk=self.agent)
-        return agent.get_first_name
         
 
 class Comment(models.Model):
@@ -68,5 +33,126 @@ class User(AbstractUser):
     
     def __repr__(self):
         return self.first_name
+        
+class Status(models.Model):
+    name = models.CharField(max_length=30)
+    code = models.CharField(max_length=10)
+    start_event = models.BooleanField(default = True)
+    stop_event = models.BooleanField(default = False)
+    default = models.BooleanField(default = False)
     
+    def __str__(self):
+        return self.name
 
+class Type(models.Model):
+    name = models.CharField(max_length=30)
+    code = models.CharField(max_length=10)
+
+    def __str__(self):
+        return self.name
+    
+    @property
+    def get_name(self):
+        return self.name
+
+class SubType(models.Model):
+    parent_type = models.ForeignKey(Type)
+    name = models.CharField(max_length=30)
+    code = models.CharField(max_length=10)
+
+    def __str__(self):
+        return self.name
+        
+    @property
+    def get_name(self):
+        return self.name
+
+    
+class Event(models.Model):
+    timestamp_start = models.DateTimeField(auto_now_add=True)
+    timestamp_pause = models.DateTimeField(blank=True, null=True)
+    timestamp_end = models.DateTimeField(blank=True, null=True)
+    timestamp_updated = models.DateTimeField(auto_now=True)
+    status = models.ForeignKey(Status)
+    date_due = models.DateTimeField(blank=True, null=True)
+    agent = models.ForeignKey(settings.AUTH_USER_MODEL)
+    task_type = models.ForeignKey(Type)
+    task_sub_type = models.ForeignKey(SubType, related_name='+')
+    ticket_link = models.CharField(max_length=300)
+    ticket_name = models.CharField(max_length=100)
+    quantity = models.IntegerField()
+    team = models.ForeignKey(Team)
+    duration = models.DurationField(null=True, blank=True)
+    
+    def __str__(self):
+        return '[%s] %s' % (self.id, self.ticket_name)
+    @property
+    def get_first_name(self):
+        agent = User.objets.get(pk=self.agent)
+        return agent.get_first_name
+   
+    def get_duration(self):
+        # Get all activities related to event
+        # Compute for proper time
+        start_activity = None
+        stop_activity = None
+        duration = None
+        
+        if Activity.objects.filter(event=self.id).exists():
+            activity_set = Activity.objects.filter(event=self.id).order_by('date')
+            print 'Found Activity! ' + str(len(activity_set)) 
+            for activity in activity_set:
+                print '1'
+                if activity.action.start_event:
+                    print 'Saw activity %s' % (activity.action.name)
+                    start_activity = activity.date
+                    print 'Start: ' + str(start_activity)
+                elif activity.action.stop_event:
+                    print 'Saw activity %s' % (activity.action.name)
+                    stop_activity = activity.date
+                    print str(stop_activity)
+                    print 'Stop: ' + str(stop_activity)
+                    # If event started with a stop event don't do any calculations 
+                    try:
+                        latest_duration = stop_activity - start_activity
+                        if duration is None:
+                            duration = latest_duration
+                        else:
+                            duration = duration + latest_duration
+                        print 'Duration: ' + str(duration)
+                    except TypeError:
+                        pass
+                else:
+                    pass
+        return duration
+        
+
+class Ticket(models.Model):
+    name = models.CharField(max_length=50)
+    link = models.CharField(max_length=300, unique=True)
+    
+    def __str__(self):
+        return self.link
+
+class Activity(models.Model):
+    date = models.DateTimeField(auto_now_add=True)
+    action = models.ForeignKey(Status)
+    agent = models.ForeignKey(settings.AUTH_USER_MODEL)
+    event = models.ForeignKey(Event)
+    
+    def __str__(self):
+        return str(self.date)+str(self.agent)+str(self.action)
+
+def create_activity(sender, **kwargs):
+    print kwargs
+    ''' Create activity when event is changed and compute for duration '''
+    event = kwargs['instance']
+    if event:
+        activity = Activity.objects.create(
+            event=kwargs['instance'],
+            action=kwargs['instance'].status,
+            agent=kwargs['instance'].agent
+        )
+        update_event_duration = Event.objects.filter(pk=event.id).update(duration = event.get_duration())
+                
+post_save.connect(create_activity, sender=Event)

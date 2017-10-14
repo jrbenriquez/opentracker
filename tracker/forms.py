@@ -4,5 +4,5 @@ from tracker.models import Event
 class EventForm(ModelForm):
     class Meta:
         model = Event
-        fields = ['team', 'agent', 'task_type', 'task_sub_type',
+        fields = ['status', 'team', 'agent', 'task_type', 'task_sub_type',
                     'ticket_link', 'ticket_name', 'quantity']

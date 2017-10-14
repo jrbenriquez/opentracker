@@ -25,7 +25,7 @@
     <div class="container">
           <div class="row">
             <div class="col-xs-12">
-                <form action="{% url 'home' %}" method="post">
+                <form name="newTask" action="{% url 'home' %}" method="post">
                     {% csrf_token %}
                     {{ form }}
                     <input type="submit" value="New Event" />
@@ -35,7 +35,8 @@
     </div>
     <br><br><br><br>
     <div>
-        <strong>Filter (dynamic filter in the future):</strong> | Tickets Today | Events Today |
+      <strong>Teams</strong> | Teams 1 | Teams 2 | Teams 3 | <br>
+      <strong>Filter (dynamic filter in the future):</strong> | Tickets Today | Events Today |
     </div>
     <br><br>
     <div>
@@ -45,7 +46,8 @@
             <th>Time Updated</th>
             <th>Actions</th>
             <th>Status</th>
-            <th>Team</th> 
+            <!-- <th>Team</th> -->
+            <th>Duration</th>
             <th>Agent</th>
             <th>Task Type</th>
             <th>Task Sub Type</th>
@@ -60,12 +62,44 @@
           <tr>
                 <td>{{ e.timestamp_start }}</td>
                 <td>{{ e.timestamp_updated }}</td>
-                <th>(>/||) (x) (done)</th>
+                <td>
+                  {% if e.status.start_event %}
+                    {% for s in status_stop %}
+                   <form id="form_event_stop_{{ e.id }}_{{ s.id }}" action="{% url 'home' %}" method="post">
+                           {% csrf_token %}
+                          <input type="hidden" value="{{ e.id }}" name="event" />
+                          <input type="hidden" value="stop" name="action" />
+                          <input type="hidden" value="" name="activity"/>
+                   </form>
+                  
+                  
+                
+                  <span onClick="stopEvent({{ e.id }}, {{ s.id }})"><a class="btn">{{ s.name }}</a></span>,
+                  {% endfor %}
+                  
+                  
+                  {% elif e.status.stop_event %}
+                  {% for s in status_start %}
+                  <form id="form_event_start_{{ e.id }}_{{ s.id }}" action="{% url 'home' %}" method="post">
+                           {% csrf_token %}
+                          <input type="hidden" value="{{ e.id }}" name="event" />
+                           <input type="hidden" value="start" name="action" />
+                           <input type="hidden" value="" name="activity"/>
+                   </form>
+                  
+                  <span onClick="startEvent({{ e.id }}, {{ s.id }})"><a class="btn">{{ s.name }}</a></span>,
+                  {% endfor %}
+                  {% else %}
+                  No Action
+                  {% endif %}
+                
+                </td>
                 <td>{{ e.status }}</td>
-                <td>{{ e.team }}</td> 
+                <!-- <td>{{ e.team }}</td> -->
+                <td>{{ e.duration }}</td>
                 <td>{{ e.agent.first_name }}</td>
-                <td>{{ e.get_task_type }}</td>
-                <td>{{ e.get_task_sub_type }}</td>
+                <td>{{ e.task_type.name }}</td>
+                <td>{{ e.task_sub_type.name }}</td>
                 <td>{{ e.ticket_link }}</td>
                 <td>{{ e.ticket_name }}</td>
                 <td>{{ e.quantity }}</td>
@@ -76,13 +110,38 @@
 </table>
         
     </div>
-    
-
-
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="{% static "tracker/css/bootstrap.min.js" %}"></script>
+              <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="{% static "tracker/js/jquery.min.js" %}"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="tracker/js/bootstrap.min.js"></script>
+    <script src="{% static "tracker/js/bootstrap.min.js" %}"></script>
+    <script>
+        
+
+        function stopEvent(eventID, statusID) {     
+                var formname = 'form_event_stop_' + eventID + "_" + statusID;
+                document.forms[formname].elements["activity"].value = statusID;
+                document.getElementById(formname).submit();
+        
+        }
+        
+        function startEvent(eventID, statusID) {     
+                var formname = 'form_event_start_' + eventID + "_" + statusID;
+                document.forms[formname].elements["activity"].value = statusID;
+                document.getElementById(formname).submit();
+        
+        }
+
+
+
+        
+
+
+        
+        </script>
+
+
+
+
   </body>
 </html>
 
