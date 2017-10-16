@@ -21,7 +21,7 @@
     <![endif]-->
   </head>
   <body>
-    <h1>Production Tracker Beta</h1> <br> <br>
+    <h1>Production Tracker All</h1> <br> <br>
     <div class="container">
           <div class="row">
             <div class="col-xs-12">
@@ -35,8 +35,12 @@
     </div>
     <br><br><br><br>
     <div>
-      <strong>Teams</strong> | Teams 1 | Teams 2 | Teams 3 | <br>
       <strong>Filter (dynamic filter in the future):</strong> | Tickets Today | Events Today |
+      <br>
+      <strong>Choose team:</strong> <br>
+      {% for team in teams %}
+          {{ team }} |
+      {% endfor %}
     </div>
     <br><br>
     <div>
@@ -100,7 +104,7 @@
                 <td>{{ e.agent.first_name }}</td>
                 <td>{{ e.task_type.name }}</td>
                 <td>{{ e.task_sub_type.name }}</td>
-                <td>{{ e.ticket_link }}</td>
+                <td>{{ e.unique_identifier }}</td>
                 <td>{{ e.ticket_name }}</td>
                 <td>{{ e.quantity }}</td>
                 <td>View Comments</td>

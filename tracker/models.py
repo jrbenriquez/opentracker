@@ -33,6 +33,10 @@ class User(AbstractUser):
     
     def __repr__(self):
         return self.first_name
+    
+    @property
+    def full_name(self):
+        return '%s %s' % (self.first_name, self.last_name)
         
 class Status(models.Model):
     name = models.CharField(max_length=30)
@@ -78,7 +82,7 @@ class Event(models.Model):
     agent = models.ForeignKey(settings.AUTH_USER_MODEL)
     task_type = models.ForeignKey(Type)
     task_sub_type = models.ForeignKey(SubType, related_name='+')
-    ticket_link = models.CharField(max_length=300)
+    unique_identifier = models.CharField(max_length=300)
     ticket_name = models.CharField(max_length=100)
     quantity = models.IntegerField()
     team = models.ForeignKey(Team)
@@ -129,10 +133,11 @@ class Event(models.Model):
 
 class Ticket(models.Model):
     name = models.CharField(max_length=50)
-    link = models.CharField(max_length=300, unique=True)
+    unique_identifier = models.CharField(max_length=300, unique=True)
+    status = models.ForeignKey(Status)
     
     def __str__(self):
-        return self.link
+        return self.unique_identifier
 
 class Activity(models.Model):
     date = models.DateTimeField(auto_now_add=True)
@@ -144,7 +149,6 @@ class Activity(models.Model):
         return str(self.date)+str(self.agent)+str(self.action)
 
 def create_activity(sender, **kwargs):
-    print kwargs
     ''' Create activity when event is changed and compute for duration '''
     event = kwargs['instance']
     if event:
@@ -153,6 +157,17 @@ def create_activity(sender, **kwargs):
             action=kwargs['instance'].status,
             agent=kwargs['instance'].agent
         )
-        update_event_duration = Event.objects.filter(pk=event.id).update(duration = event.get_duration())
-                
+        update_event_duration = Event.objects.filter(pk=event.id).update(
+            duration = event.get_duration())
+ 
+def update_ticket_status(sender, **kwargs):
+    ''' Update the status of the ticket after an activity is done '''
+    activity = kwargs['instance']
+    if activity:
+        update_ticket = Ticket.objects.filter(
+            unique_identifier=activity.event.unique_identifier
+        ).update(status = activity.action)
+     
 post_save.connect(create_activity, sender=Event)
+#After saving activity update Ticket status
+post_save.connect(update_ticket_status, sender=Activity)

@@ -77,7 +77,7 @@ def home(request):
             else:
                 pass
     form = EventForm()
-    events = Event.objects.all()
+    events = Event.objects.order_by('-timestamp_updated', 'status')
     status_start = Status.objects.filter(start_event=True)
     status_stop = Status.objects.filter(stop_event=True)
     teams = Team.objects.all()

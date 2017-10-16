@@ -5,4 +5,4 @@ class EventForm(ModelForm):
     class Meta:
         model = Event
         fields = ['status', 'team', 'agent', 'task_type', 'task_sub_type',
-                    'ticket_link', 'ticket_name', 'quantity']
+                    'unique_identifier', 'ticket_name', 'quantity']
