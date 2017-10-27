@@ -21,4 +21,9 @@ from tracker import views
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', views.home, name='home'),
+    url(r'^team/(?P<team_id>[0-9]+)/$', views.team, name='team'),
+    url(r'^user/(?P<user_id>[0-9]+)/$', views.user, name='user'),
+    url(r'^event/(?P<event_id>[0-9]+)/$', views.event, name='event'),
+    url(r'^event/new/$', views.new, name='new'),
+    url(r'^event/new/(?P<parent_page>[A-z]+)/$', views.new_submit, name='new_submit'),
 ]

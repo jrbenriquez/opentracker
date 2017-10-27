@@ -1,91 +1,263 @@
 from django.shortcuts import render
-from tracker.models import Event, User, Team, Status, Type, SubType, Ticket
-from tracker.forms import EventForm
+from django.contrib import messages
+from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseRedirect
+from django.http import QueryDict
+from django.views.generic.edit import FormView
+from django.contrib.messages.views import SuccessMessageMixin
+from tracker.models import Event, User, Team, Status, Type, SubType, Ticket
+from tracker.forms import (
+    EventForm, TeamEventForm, TeamAgentEventForm,
+    )
+from datetime import date
+
+def create_event(form):
+    # check whether it's valid:
+    if form.is_valid():
+        # process the data in form.cleaned_data as required
+        # Status.objects.all()[0]
+        status = form.cleaned_data['status']
+        date_due = form.cleaned_data['date_due']
+        agent = form.cleaned_data['agent']
+        task_type = form.cleaned_data['task_type']
+        # task_sub_type = SubType.objects.get_or_none(pk=request.POST.get('task_sub_type'))
+        #Ticket Check Block
+        # Creates a ticket if it does not exist
+        unique_identifier = form.cleaned_data['unique_identifier']
+        ticket_name = form.cleaned_data['ticket_name']
+        
+        if Ticket.objects.filter(unique_identifier=unique_identifier).exists():
+            ticket_name = Ticket.objects.get(unique_identifier=unique_identifier)
+        else:
+            ticket = Ticket.objects.create(
+                name = ticket_name,
+                unique_identifier = unique_identifier,
+                status = status
+                )
+        quantity = form.cleaned_data['quantity']
+        team = form.cleaned_data['team']
+        Event.objects.create(
+            status=status,
+            date_due=date_due,
+            agent=agent,
+            task_type=task_type,
+            unique_identifier=unique_identifier,
+            ticket_name=ticket_name,
+            quantity=quantity,
+            team=team,
+        )
+    else:
+        pass
+
+def start_event(request):
+    # POST request requirements:
+    # event -> key of event
+    # activity -> key of status
+    print request.POST.get('activity')
+    eventid = request.POST.get('event')
+    event = Event.objects.get(pk=eventid)
+    event.status = Status.objects.get(pk=request.POST.get('activity'))
+    event.save()
+
+def stop_event(request):
+    # POST request requirements:
+    # event -> key of event
+    # activity -> key of status
+    print request.POST.get('activity')
+    eventid = request.POST.get('event')
+    event = Event.objects.get(pk=eventid)
+    event.status = Status.objects.get(pk=request.POST.get('activity'))
+    event.duration = event.get_duration()
+    event.save()
+
+def pause_event(request):
+    # POST request requirements:
+    # event -> key of event
+    # activity -> key of status
+    print request.POST.get('activity')
+    eventid = request.POST.get('event')
+    event = Event.objects.get(pk=eventid)
+    event.status = Status.objects.get(pk=request.POST.get('activity'))
+    event.duration = event.get_duration()
+    event.save()
 
 # Create your views here.
 def home(request):
-    print request.method
+    #Table Actions using POST
     if request.method == 'POST':
-        # create a form instance and populate it with data from the request:
         if request.POST.get('action') == 'start':
-            # POST request requirements:
-            # event -> key of event
-            # activity -> key of status
-            print request.POST.get('activity')
-            eventid = request.POST.get('event')
-            event = Event.objects.get(pk=eventid)
-            event.status = Status.objects.get(pk=request.POST.get('activity'))
-            event.save()
-            
-            
-            
+            start_event(request)
         elif request.POST.get('action') == 'stop':
-            # POST request requirements:
-            # event -> key of event
-            # activity -> key of status
-            print request.POST.get('activity')
-            eventid = request.POST.get('event')
-            event = Event.objects.get(pk=eventid)
-            event.status = Status.objects.get(pk=request.POST.get('activity'))
-            event.duration = event.get_duration()
-            event.save()
-            
-        else:
-            form = EventForm(request.POST)
-            # check whether it's valid:
-            if form.is_valid():
-                # process the data in form.cleaned_data as required
-                # Status.objects.all()[0]
-                status = Status.objects.get(pk=request.POST.get('status'))
-                timestamp_pause = request.POST.get('timestamp_pause')
-                timestamp_end = request.POST.get('timestamp_end')
-                date_due = request.POST.get('date_due')
-                agent = User.objects.get(pk=request.POST.get('agent'))
-                task_type = Type.objects.get(pk=request.POST.get('task_type'))
-                task_sub_type = SubType.objects.get(pk=request.POST.get('task_sub_type'))
-                #Ticket Check Block
-                # Creates a ticket if it does not exist
-                ticket_link = request.POST.get('ticket_link')
-                ticket_name = request.POST.get('ticket_name')
-                
-                if Ticket.objects.filter(link=ticket_link).exists():
-                    ticket_name = Ticket.objects.get(link=ticket_link)
-                else:
-                    ticket = Ticket.objects.create(
-                        name = ticket_name,
-                        link = ticket_link
-                        )
-                quantity = request.POST.get('quantity')
-                team = Team.objects.get(pk=request.POST.get('team'))
-                Event.objects.create(
-                    status=status,
-                    timestamp_pause=timestamp_pause,
-                    timestamp_end=timestamp_end,
-                    date_due=date_due,
-                    agent=agent,
-                    task_type=task_type,
-                    task_sub_type=task_sub_type,
-                    ticket_link=ticket_link,
-                    ticket_name=ticket_name,
-                    quantity=quantity,
-                    team=team,
-                )
-                # ...
-                # redirect to a new URL:
-                return HttpResponseRedirect('/')
-            else:
-                pass
+            stop_event(request)
+        elif request.POST.get('action') == 'pause':
+            pause_event(request)
     form = EventForm()
     events = Event.objects.order_by('-timestamp_updated', 'status')
     status_start = Status.objects.filter(start_event=True)
     status_stop = Status.objects.filter(stop_event=True)
-    teams = Team.objects.all()
+    status_pause = Status.objects.filter(pause_event=True)
+    teams = Team.objects.order_by('id')
     context = {
             'form': form,
             'events': events,
             'status_start': status_start,
             'status_stop': status_stop,
-            'teams': teams
+            'status_pause': status_pause,
+            'teams': teams,
+            'parent_page': 'home',
+            'idx': None
         }
     return render(request, 'tracker/home.html', context)
+# Team and User view not yet implemented
+def team(request, team_id):
+    #Table Actions using POST
+    if request.method == 'POST':
+        if request.POST.get('action') == 'start':
+            start_event(request)
+        elif request.POST.get('action') == 'stop':
+            stop_event(request)
+        elif request.POST.get('action') == 'pause':
+            pause_event(request)
+    events = Event.objects.filter(
+        team=team_id).order_by('-timestamp_updated', 'status')
+    status_start = Status.objects.filter(start_event=True)
+    status_pause = Status.objects.filter(pause_event=True)
+    status_stop = Status.objects.filter(stop_event=True)
+    team = Team.objects.get(pk=team_id)
+    teams = Team.objects.order_by('id')
+    users = User.objects.filter(team=team_id)
+    initial_dict = {
+            'team': team.id,
+    }
+    form = TeamEventForm(initial = initial_dict)
+    context = {
+            'form': form,   
+            'events': events,
+            'status_start': status_start,
+            'status_stop': status_stop,
+            'status_pause': status_pause,
+            'team': team,
+            'teams': teams,
+            'users' : users,
+            'parent_page': 'team',
+            'id' : team.id
+        }
+    return render(request, 'tracker/team.html', context)
+
+def user(request, user_id):
+     #Table Actions using POST
+    if request.method == 'POST':
+        if request.POST.get('action') == 'start':
+            start_event(request)
+        elif request.POST.get('action') == 'stop':
+            stop_event(request)
+        elif request.POST.get('action') == 'pause':
+            pause_event(request)
+    form = TeamAgentEventForm()
+    events = Event.objects.filter(
+        agent=user_id).order_by('-timestamp_updated', 'status')
+    status_start = Status.objects.filter(start_event=True)
+    status_pause = Status.objects.filter(pause_event=True)
+    status_stop = Status.objects.filter(stop_event=True)
+    team = Team.objects.get(user=user_id)
+    teams = Team.objects.order_by('id')
+    user = User.objects.get(pk=user_id)
+    context = {
+            'form': form,
+            'events': events,
+            'status_start': status_start,
+            'status_pause': status_pause,
+            'status_stop': status_stop,
+            'teams': teams,
+            'team': team,
+            'user' : user,
+            'parent_page': 'user',
+            'id' : user.id
+        }
+    return render(request, 'tracker/user.html', context)
+
+def event(request, event_id):
+    event = Event.objects.get(pk=event_id)
+    context = {
+        'event': event
+    }
+    
+    return render(request, 'tracker/user.html', context)
+    
+
+def new(request):
+    if request.method == 'GET':
+        #Get the previous page the new request was created
+        referrer = request.META['HTTP_REFERER'].split('/')
+        parent_page = referrer[3]
+        #If it is from the home page, throw a basic empty EventForm
+        if not parent_page:
+            form = EventForm()
+            context = {
+                        'form': form,
+                        'parent_page': parent_page,
+            }
+        #Else load the necessary initial values to the form
+        else:
+            #Get the specific id of requestor
+            parent_id = referrer[4]
+            if parent_page == 'team':
+                parent_object = Team.objects.get(pk=parent_id)
+                initial_dict ={
+                        'team': parent_object.id
+                        
+                }
+                form = TeamEventForm(initial=initial_dict)
+            elif parent_page == 'user':
+                parent_object = User.objects.get(pk=parent_id)
+                initial_dict ={
+                        'team': parent_object.team.id,
+                        'agent': parent_object.id
+                        
+                }
+                form = TeamEventForm(initial=initial_dict)
+            #Error if not user or team
+            context = {
+                    'form': form,
+                    'parent_page': parent_page,
+                    'parent_object' : parent_object,
+                    'id' : parent_object.id
+                    
+                }
+        print "RENDERIIINGs"
+        return render(request, 'tracker/new_event.html', context)
+
+def new_submit(request, parent_page):
+    print request.method
+    if request.method == 'POST':
+        parent_id = request.POST.get('team')
+        if parent_page == 'team':
+            parent_object = Team.objects.get(pk=parent_id)
+            form = TeamEventForm(request.POST, initial={'team': parent_id})
+        elif parent_page == 'user':
+            parent_object = User.objects.get(pk=parent_id)
+        #Error if not user or team
+        print parent_id
+        if form.is_valid():
+            create_event(form)
+            return HttpResponseRedirect('/')
+        else:
+            messages.error(request, "Please correct the errors below and resubmit.")
+            return render(request, 'tracker/new_event.html', {'form': form})
+        
+class AjaxTemplateMixin(object):
+    def dispatch(self, request, *args, **kwargs):
+        if not hasattr(self, 'ajax_template_name'):
+            split = self.template_name.split('.html')
+            split[-1] = '_inner'
+            split.append('.html')
+            self.ajax_template_name = ''.join(split)
+        if request.is_ajax():
+            self.template_name = self.ajax_template_name
+        return super(AjaxTemplateMixin, self).dispatch(request, *args, **kwargs)
+
+class EventFormView(SuccessMessageMixin, AjaxTemplateMixin, FormView):
+    template_name = 'tracker/new_event.html'
+    form_class = EventForm
+    success_url = reverse_lazy('new')
+    success_message = "Way to go!"

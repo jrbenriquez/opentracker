@@ -4,7 +4,16 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import pre_save, post_save
+from django.core.exceptions import ObjectDoesNotExist
 
+#Manager
+class TrackerManager(models.Manager):
+
+    def get_or_none(self, **kwargs):
+        try:
+            return self.get(**kwargs)
+        except ObjectDoesNotExist:
+            return None
 # Create your models here.
 class Team(models.Model):
     name = models.CharField(max_length=20,
@@ -27,7 +36,6 @@ class Comment(models.Model):
 class User(AbstractUser):
     team = models.ForeignKey(Team, null=True)
     
-    
     def __str__(self):
         return self.first_name
     
@@ -42,6 +50,7 @@ class Status(models.Model):
     name = models.CharField(max_length=30)
     code = models.CharField(max_length=10)
     start_event = models.BooleanField(default = True)
+    pause_event = models.BooleanField(default = False)
     stop_event = models.BooleanField(default = False)
     default = models.BooleanField(default = False)
     
@@ -49,6 +58,7 @@ class Status(models.Model):
         return self.name
 
 class Type(models.Model):
+    parent_team = models.ForeignKey(Team)
     name = models.CharField(max_length=30)
     code = models.CharField(max_length=10)
 
@@ -63,12 +73,8 @@ class SubType(models.Model):
     parent_type = models.ForeignKey(Type)
     name = models.CharField(max_length=30)
     code = models.CharField(max_length=10)
-
+    objects = TrackerManager()
     def __str__(self):
-        return self.name
-        
-    @property
-    def get_name(self):
         return self.name
 
     
@@ -81,9 +87,8 @@ class Event(models.Model):
     date_due = models.DateTimeField(blank=True, null=True)
     agent = models.ForeignKey(settings.AUTH_USER_MODEL)
     task_type = models.ForeignKey(Type)
-    task_sub_type = models.ForeignKey(SubType, related_name='+')
-    unique_identifier = models.CharField(max_length=300)
-    ticket_name = models.CharField(max_length=100)
+    unique_identifier = models.CharField(max_length=500)
+    ticket_name = models.CharField(max_length=500)
     quantity = models.IntegerField()
     team = models.ForeignKey(Team)
     duration = models.DurationField(null=True, blank=True)
@@ -95,7 +100,7 @@ class Event(models.Model):
         agent = User.objets.get(pk=self.agent)
         return agent.get_first_name
    
-    def get_duration(self):
+    def get_duration(self, *args, **kwargs):
         # Get all activities related to event
         # Compute for proper time
         start_activity = None
@@ -132,7 +137,7 @@ class Event(models.Model):
         
 
 class Ticket(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=500)
     unique_identifier = models.CharField(max_length=300, unique=True)
     status = models.ForeignKey(Status)
     
@@ -144,6 +149,7 @@ class Activity(models.Model):
     action = models.ForeignKey(Status)
     agent = models.ForeignKey(settings.AUTH_USER_MODEL)
     event = models.ForeignKey(Event)
+    ticket = models.ForeignKey(Ticket)
     
     def __str__(self):
         return str(self.date)+str(self.agent)+str(self.action)
@@ -155,7 +161,8 @@ def create_activity(sender, **kwargs):
         activity = Activity.objects.create(
             event=kwargs['instance'],
             action=kwargs['instance'].status,
-            agent=kwargs['instance'].agent
+            agent=kwargs['instance'].agent,
+            ticket=Ticket.objects.get(unique_identifier = kwargs['instance'].unique_identifier ),
         )
         update_event_duration = Event.objects.filter(pk=event.id).update(
             duration = event.get_duration())

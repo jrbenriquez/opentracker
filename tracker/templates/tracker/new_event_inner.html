@@ -1,0 +1,6 @@
+{% load widget_tweaks %}
+{% load crispy_forms_tags %}
+        <form action="{% url 'new_submit' 'team' %}" method="post">
+            {% crispy form %}
+        </form>
+       

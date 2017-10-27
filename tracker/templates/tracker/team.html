@@ -1,18 +1,23 @@
 {% extends 'tracker/base.html' %}
-  
+
     {% block content %}
-    
-    
     <div class="container">
       <div class="row">
         <div class="col-xs-12">
-             <div>
-              <strong>Filter (dynamic filter in the future):</strong> | Tickets Today | Events Today |
-              <br>
-              <strong>Team View:</strong> <br>
-              {% for team in teams %}
-                 <a href="{% url 'team' team.id %}">{{ team }}</a> |
-              {% endfor %}
+            <div>
+                <strong>Filter (dynamic filter in the future):</strong> | Tickets Today | Events Today |
+                <br>
+                <strong>Choose team:</strong> <br>
+                {% for t in teams %}
+                    {% if t == team %} <strong> {% endif %}
+                         <a href="{% url 'team' t.id %}">{{ t }}</a> |
+                    {% if t == team %} </strong> {% endif %}
+                {% endfor %}
+                <br>
+                <strong>Users:</strong> <br>
+                {% for u in users %}
+                    <a href="{% url 'user' u.id %}">{{ u }}</a> |
+                {% endfor %}
             </div>
             <button style="margin: 0.5em" id="comment-button" class="btn btn-large">New</button>
         </div>
@@ -24,12 +29,8 @@
 
       
     {% endblock content %}
-            
-
-
+   
     {% block javascript %}
-    
-    
          <script>
         
         function startEvent(eventID, statusID) {     
@@ -53,12 +54,12 @@
         
         }
         </script>
-        
-        
     {% endblock javascript %}
-    
 
 
+
+  </body>
+</html>
 
 
 

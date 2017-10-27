@@ -1,0 +1,106 @@
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12">
+          <div>
+            <table style="width:100%" class="table table-striped table-hover table-condensed table-responsive">
+                <tr>
+                  <th>Time Started</th>
+                  <th>Time Updated</th>
+                  <th>Actions</th>
+                  <th>Status</th>
+                  <!-- <th>Team</th> -->
+                  <th>Duration</th>
+                  <th>Agent</th>
+                  <th>Task Type</th>
+                  <th>Task Sub Type</th>
+                  <th>Ticket Link</th>
+                  <th>Ticket Name</th>
+                  <th>Quantity</th>
+                  <th>Comments</th>
+                  
+                  
+                </tr>
+                {% for e in events %}
+                <tr class='clickable-row' data-href='https://www.google.com'>
+                      <td>{{ e.timestamp_start }}</td>
+                      <td>{{ e.timestamp_updated }}</td>
+                      <td style='white-space: nowrap;' align="center">
+                        {% if e.status.start_event %}
+                        
+                        {% for s in status_pause %}
+                         <form id="form_event_pause_{{ e.id }}_{{ s.id }}" action="
+                               {% if parent_page == 'home' %}
+                               {% url parent_page %}
+                               {% else %}
+                               {% url parent_page id %}
+                               {% endif %}" method="post">
+                                 {% csrf_token %}
+                                <input type="hidden" value="{{ e.id }}" name="event" />
+                                <input type="hidden" value="pause" name="action" />
+                                <input type="hidden" value="" name="activity"/>
+                         </form>
+                        
+                        
+                      
+                        <a style="margin-bottom: 8px;" onClick="pauseEvent({{ e.id }}, {{ s.id }})" class="btn btn-danger btn-sm">{{ s.name }}</a>
+                        {% endfor %}
+                        
+                          {% for s in status_stop %}
+                         <form id="form_event_stop_{{ e.id }}_{{ s.id }}" action="
+                               {% if parent_page == 'home' %}
+                               {% url parent_page %}
+                               {% else %}
+                               {% url parent_page id %}
+                               {% endif %}" method="post">
+                                 {% csrf_token %}
+                                <input type="hidden" value="{{ e.id }}" name="event" />
+                                <input type="hidden" value="stop" name="action" />
+                                <input type="hidden" value="" name="activity"/>
+                         </form>
+                        
+                        
+                      
+                        <a style="margin-bottom: 8px;" onClick="stopEvent({{ e.id }}, {{ s.id }})" class="btn btn-default btn-sm">{{ s.name }}</a>
+                        {% endfor %}
+                        
+                        
+                        {% elif e.status.stop_event or e.status.pause_event %}
+                        {% for s in status_start %}
+                        <form id="form_event_start_{{ e.id }}_{{ s.id }}" action="
+                               {% if parent_page == 'home' %}
+                               {% url parent_page %}
+                               {% else %}
+                               {% url parent_page id %}
+                               {% endif %}" method="post">
+                                 {% csrf_token %}
+                                <input type="hidden" value="{{ e.id }}" name="event" />
+                                 <input type="hidden" value="start" name="action" />
+                                 <input type="hidden" value="" name="activity"/>
+                         </form>
+                        
+                        <a style="margin-bottom: 8px;" onClick="startEvent({{ e.id }}, {{ s.id }})" class="btn btn-default btn-sm">{{ s.name }}</a>
+                        {% endfor %}
+                        {% else %}
+                        No Action
+                        {% endif %}
+        
+                      </td>
+                      <td 'white-space: nowrap;' bgcolor={% if e.status.start_event %}"#ffff66" {% elif e.status.pause_event %}"#ff6666"{% else %}"#33ff77"{% endif %}>{{ e.status }}</td>
+                      <!-- <td>{{ e.team }}</td> -->
+                      <td>{{ e.duration }}</td>
+                      <td style='white-space: nowrap'><strong>{{ e.agent.first_name }}</strong></td>
+                      
+                      <td>{{ e.task_type.name }}</td>
+                      <td>{{ e.task_sub_type.name }}</td>
+                      <td>{{ e.unique_identifier }}</td>
+                      <td>{{ e.ticket_name }}</td>
+                      <td>{{ e.quantity }}</td>
+                      <td>Add | View</td>
+                </tr>
+                {% endfor %}
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    
