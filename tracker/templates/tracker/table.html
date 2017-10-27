@@ -21,7 +21,7 @@
                   
                 </tr>
                 {% for e in events %}
-                <tr class='clickable-row' data-href='https://www.google.com'>
+                <tr class='clickable-row' data-href="{% url 'event' e.id %}">
                       <td>{{ e.timestamp_start }}</td>
                       <td>{{ e.timestamp_updated }}</td>
                       <td style='white-space: nowrap;' align="center">

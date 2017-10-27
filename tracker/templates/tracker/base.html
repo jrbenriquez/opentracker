@@ -13,7 +13,8 @@
     <!-- Bootstrap -->
     <link href="{% static "tracker/css/bootstrap.min.css" %}" rel="stylesheet">
     <link href="{% static "tracker/css/overall.css" %}" rel="stylesheet">
-
+    {% block css %}
+    {% endblock css %}
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -50,7 +51,7 @@
     </script>
     <script type="text/javascript">
             $('#new_event').on('hidden.bs.modal', function () {
-                var redirect_page = {% if parent_page == 'home' or parent_page == '' %}"{% url 'home' %}"{% else %}"{% url parent_page id %}"{% endif %}
+                var redirect_page = {% if parent_page == 'team' or parent_page == 'user' %}"{% url parent_page id %}"{% else %}"{% url 'home' %}"{% endif %}
                 window.location.replace(redirect_page)
             })
             var formAjaxSubmit = function(form, modal) {

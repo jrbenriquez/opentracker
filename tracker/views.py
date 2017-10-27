@@ -179,10 +179,10 @@ def user(request, user_id):
 def event(request, event_id):
     event = Event.objects.get(pk=event_id)
     context = {
-        'event': event
+        'event': event,
     }
     
-    return render(request, 'tracker/user.html', context)
+    return render(request, 'tracker/event.html', context)
     
 
 def new(request):
