@@ -1,29 +1,27 @@
     <div class="container">
       <div class="row">
-        <div class="col-xs-12">
+        <div class="col-xs-10">
           <div>
             <table style="width:100%" class="table table-striped table-hover table-condensed table-responsive">
                 <tr>
-                  <th>Time Started</th>
-                  <th>Time Updated</th>
+                  <th>Time&nbspStarted</th>
+                  <!-- <th>Time&nbspUpdated</th> -->
                   <th>Actions</th>
                   <th>Status</th>
                   <!-- <th>Team</th> -->
-                  <th>Duration</th>
+                  <!-- <th>Duration</th> -->
                   <th>Agent</th>
-                  <th>Task Type</th>
-                  <th>Task Sub Type</th>
-                  <th>Ticket Link</th>
-                  <th>Ticket Name</th>
+                  <th>Task&nbspType</th>
+                  <th>Ticket&nbspLink</th>
+                  <th>Ticket&nbspName</th>
                   <th>Quantity</th>
-                  <th>Comments</th>
                   
                   
                 </tr>
                 {% for e in events %}
-                <tr class='clickable-row' data-href="{% url 'event' e.id %}">
-                      <td>{{ e.timestamp_start }}</td>
-                      <td>{{ e.timestamp_updated }}</td>
+                <tr>
+                      <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.timestamp_start }}</td>
+                      <!-- <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.timestamp_updated }}</td> -->
                       <td style='white-space: nowrap;' align="center">
                         {% if e.status.start_event %}
                         
@@ -85,17 +83,15 @@
                         {% endif %}
         
                       </td>
-                      <td 'white-space: nowrap;' bgcolor={% if e.status.start_event %}"#ffff66" {% elif e.status.pause_event %}"#ff6666"{% else %}"#33ff77"{% endif %}>{{ e.status }}</td>
+                      <td class='clickable-row' data-href="{% url 'event' e.id %}" style='white-space: nowrap;' bgcolor={% if e.status.start_event %}"#ffff66" {% elif e.status.pause_event %}"#ff6666"{% else %}"#33ff77"{% endif %}>{{ e.status }}</td>
                       <!-- <td>{{ e.team }}</td> -->
-                      <td>{{ e.duration }}</td>
-                      <td style='white-space: nowrap'><strong>{{ e.agent.first_name }}</strong></td>
+                      <!-- <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.duration }}</td> -->
+                      <td class='clickable-row' data-href="{% url 'event' e.id %}" style='white-space: nowrap'><strong>{{ e.agent.first_name }}</strong></td>
                       
-                      <td>{{ e.task_type.name }}</td>
-                      <td>{{ e.task_sub_type.name }}</td>
-                      <td>{{ e.unique_identifier }}</td>
-                      <td>{{ e.ticket_name }}</td>
-                      <td>{{ e.quantity }}</td>
-                      <td>Add | View</td>
+                      <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.task_type.name }}</td>
+                      <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.unique_identifier }}</td>
+                      <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.ticket_name }}</td>
+                      <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.quantity }}</td>
                 </tr>
                 {% endfor %}
             </table>

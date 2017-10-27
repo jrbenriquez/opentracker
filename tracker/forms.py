@@ -127,9 +127,10 @@ class TeamAgentEventForm(ModelForm):
         exclude =('team', 'agent',  'timestamp_end', 'timestamp_pause','duration')
                     
 class TrackerUserCreationForm(UserCreationForm):
+    
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = ("username", "password1", "password2")
+        fields = ("username", "password1", "password2", "team", "first_name", "last_name", "email")
         
     error_message = UserCreationForm.error_messages.update({
         'duplicate_username': 'This username has already been taken.'

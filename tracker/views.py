@@ -7,9 +7,12 @@ from django.views.generic.edit import FormView
 from django.contrib.messages.views import SuccessMessageMixin
 from tracker.models import Event, User, Team, Status, Type, SubType, Ticket
 from tracker.forms import (
-    EventForm, TeamEventForm, TeamAgentEventForm,
+    EventForm, TeamEventForm, TeamAgentEventForm, TrackerUserCreationForm
     )
+from django.contrib.auth.forms import UserCreationForm
 from datetime import date
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.views.generic.edit import CreateView
 
 def create_event(form):
     # check whether it's valid:
@@ -92,7 +95,15 @@ def home(request):
         elif request.POST.get('action') == 'pause':
             pause_event(request)
     form = EventForm()
-    events = Event.objects.order_by('-timestamp_updated', 'status')
+    events_list = Event.objects.order_by('-timestamp_updated', 'status')
+    page = request.GET.get('page', 1)
+    paginator = Paginator(events_list, 25)
+    try:
+        events = paginator.page(page)
+    except PageNotAnInteger:
+        events = paginator.page(1)
+    except EmptyPage:
+        events = paginator.page(paginator.num_pages)
     status_start = Status.objects.filter(start_event=True)
     status_stop = Status.objects.filter(stop_event=True)
     status_pause = Status.objects.filter(pause_event=True)
@@ -244,6 +255,12 @@ def new_submit(request, parent_page):
         else:
             messages.error(request, "Please correct the errors below and resubmit.")
             return render(request, 'tracker/new_event.html', {'form': form})
+
+
+class NewUserView(CreateView):
+    template_name = 'tracker/user/user_new.html'
+    form_class = TrackerUserCreationForm
+    success_url = '/'
         
 class AjaxTemplateMixin(object):
     def dispatch(self, request, *args, **kwargs):
