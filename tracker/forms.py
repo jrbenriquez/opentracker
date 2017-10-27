@@ -25,21 +25,14 @@ class EventForm(ModelForm):
     
     def __init__(self, *args, **kwargs):
         super(EventForm, self).__init__(*args, **kwargs)
-        ''' my_field_text= [
+         #Labels
+        my_field_text= [
             # (field_name, Field title label, Detailed field description)
-            ('status', 'Status', ''),
-            ('task_type', 'Task Type', ''),
-            ('task_sub_type', 'Task Sub Type', ''),
-            ('agent', 'Agent',''),
-            ('team', 'Team', ''),
             ('unique_identifier', 'Ticket Link/ID', ''),
-            ('ticket_name', 'Ticket Name', ''),
-            ('quantity', 'Quantity', ''),
-            ('date_due', 'Due Date', ''),
          ]
         for x in my_field_text:
             self.fields[x[0]].label=x[1]
-            self.fields[x[0]].help_text=x[2] '''
+            self.fields[x[0]].help_text=x[2]
         # Set layout for fields.
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
@@ -90,6 +83,14 @@ class TeamEventForm(ModelForm):
         self.fields['task_type'].queryset = Type.objects.filter(parent_team=team_id)
         self.fields['agent'].queryset = User.objects.filter(team=team_id)
         self.fields['team'].queryset = Team.objects.filter(pk=team_id)
+        #Labels
+        my_field_text= [
+            # (field_name, Field title label, Detailed field description)
+            ('unique_identifier', 'Ticket Link/ID', ''),
+         ]
+        for x in my_field_text:
+            self.fields[x[0]].label=x[1]
+            self.fields[x[0]].help_text=x[2]
         # Set layout for fields.
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
