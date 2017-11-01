@@ -119,7 +119,6 @@ class Event(models.Model):
                 elif activity.action.stop_event:
                     print 'Saw activity %s' % (activity.action.name)
                     stop_activity = activity.date
-                    print str(stop_activity)
                     print 'Stop: ' + str(stop_activity)
                     # If event started with a stop event don't do any calculations 
                     try:

@@ -1,7 +1,7 @@
-{% extends 'tracker/base.html' %}
+{% extends 'tracker/index.html' %}
 
     {% block subheader %}
-    <h3>{{ user.first_name }}</h3>
+    {{ user.first_name }}
     {% endblock subheader %}
 
     {% block content %}
@@ -11,15 +11,7 @@
             <div>
                 <strong>Filter (dynamic filter in the future):</strong> | Tickets Today | Events Today |
                 <br>
-                <strong>Choose team:</strong> <br>
-                {% for t in teams %}
-                    {% if t == team %} <strong> {% endif %}
-                         <a href="{% url 'team' t.id %}">{{ t }}</a> |
-                    {% if t == team %} </strong> {% endif %}
-                {% endfor %}
-                <br>
             </div>
-            <button style="margin: 0.5em" id="comment-button" class="btn btn-large">New</button>
         </div>
       </div>
     </div>
@@ -27,6 +19,26 @@
 
       
     {% endblock content %}
+    
+    {% block teams %}
+    
+    {% for team in teams %}
+        <li>
+              <a href="{% url 'team' team.id %}">{{ team }}</a>
+        </li>
+    {% endfor %}
+    
+    {% endblock teams %}
+    
+    {% block users %}
+    
+    {% for user in users %}
+        <li>
+              <a href="{% url 'user' user.id %}">{{ user }} - {{ user.team }} </a>
+        </li>
+    {% endfor %}
+    
+    {% endblock users %}
     
     {% block javascript %}
          <script>

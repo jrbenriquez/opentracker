@@ -7,7 +7,7 @@ from django.views.generic.edit import FormView
 from django.contrib.messages.views import SuccessMessageMixin
 from tracker.models import Event, User, Team, Status, Type, SubType, Ticket
 from tracker.forms import (
-    EventForm, TeamEventForm, TeamAgentEventForm, TrackerUserCreationForm
+    EventForm, TeamEventForm, TrackerUserCreationForm
     )
 from django.contrib.auth.forms import UserCreationForm
 from datetime import date
@@ -60,6 +60,8 @@ def start_event(request):
     eventid = request.POST.get('event')
     event = Event.objects.get(pk=eventid)
     event.status = Status.objects.get(pk=request.POST.get('activity'))
+    print event.status
+    print "Activity detected is: " + request.POST.get('activity')
     event.save()
 
 def stop_event(request):
@@ -108,6 +110,7 @@ def home(request):
     status_stop = Status.objects.filter(stop_event=True)
     status_pause = Status.objects.filter(pause_event=True)
     teams = Team.objects.order_by('id')
+    users = User.objects.order_by('username')
     context = {
             'form': form,
             'events': events,
@@ -115,11 +118,12 @@ def home(request):
             'status_stop': status_stop,
             'status_pause': status_pause,
             'teams': teams,
+            'users': users,
             'parent_page': 'home',
             'idx': None
         }
     return render(request, 'tracker/home.html', context)
-# Team and User view not yet implemented
+# Fix users_all - should be consistent with all views
 def team(request, team_id):
     #Table Actions using POST
     if request.method == 'POST':
@@ -136,6 +140,7 @@ def team(request, team_id):
     status_stop = Status.objects.filter(stop_event=True)
     team = Team.objects.get(pk=team_id)
     teams = Team.objects.order_by('id')
+    users_all = User.objects.order_by('username')
     users = User.objects.filter(team=team_id)
     initial_dict = {
             'team': team.id,
@@ -151,7 +156,8 @@ def team(request, team_id):
             'teams': teams,
             'users' : users,
             'parent_page': 'team',
-            'id' : team.id
+            'id' : team.id,
+            'users_all' : users_all
         }
     return render(request, 'tracker/team.html', context)
 
@@ -164,22 +170,23 @@ def user(request, user_id):
             stop_event(request)
         elif request.POST.get('action') == 'pause':
             pause_event(request)
-    form = TeamAgentEventForm()
     events = Event.objects.filter(
         agent=user_id).order_by('-timestamp_updated', 'status')
+    # Status Change variables
     status_start = Status.objects.filter(start_event=True)
     status_pause = Status.objects.filter(pause_event=True)
     status_stop = Status.objects.filter(stop_event=True)
     team = Team.objects.get(user=user_id)
     teams = Team.objects.order_by('id')
     user = User.objects.get(pk=user_id)
+    users = User.objects.order_by('username')
     context = {
-            'form': form,
             'events': events,
             'status_start': status_start,
             'status_pause': status_pause,
             'status_stop': status_stop,
             'teams': teams,
+            'users': users,
             'team': team,
             'user' : user,
             'parent_page': 'user',
@@ -188,9 +195,24 @@ def user(request, user_id):
     return render(request, 'tracker/user.html', context)
 
 def event(request, event_id):
+    #Table Actions using POST
+    print request.POST
+    if request.method == 'POST':
+        if request.POST.get('action') == 'start':
+            start_event(request)
+        elif request.POST.get('action') == 'stop':
+            stop_event(request)
+        elif request.POST.get('action') == 'pause':
+            pause_event(request)
     event = Event.objects.get(pk=event_id)
+    status_start = Status.objects.filter(start_event=True)
+    status_pause = Status.objects.filter(pause_event=True)
+    status_stop = Status.objects.filter(stop_event=True)
     context = {
         'event': event,
+        'status_start': status_start,
+        'status_pause': status_pause,
+        'status_stop': status_stop,
     }
     
     return render(request, 'tracker/event.html', context)
