@@ -63,7 +63,7 @@ class Type(models.Model):
     code = models.CharField(max_length=10)
 
     def __str__(self):
-        return self.name
+        return "%s - %s" % (self.parent_team, self.name)
     
     @property
     def get_name(self):
@@ -111,12 +111,11 @@ class Event(models.Model):
             activity_set = Activity.objects.filter(event=self.id).order_by('date')
             print 'Found Activity! ' + str(len(activity_set)) 
             for activity in activity_set:
-                print '1'
                 if activity.action.start_event:
                     print 'Saw activity %s' % (activity.action.name)
                     start_activity = activity.date
                     print 'Start: ' + str(start_activity)
-                elif activity.action.stop_event:
+                elif activity.action.stop_event or activity.action.pause_event:
                     print 'Saw activity %s' % (activity.action.name)
                     stop_activity = activity.date
                     print 'Stop: ' + str(stop_activity)
@@ -129,7 +128,7 @@ class Event(models.Model):
                             duration = duration + latest_duration
                         print 'Duration: ' + str(duration)
                     except TypeError:
-                        pass
+                        print "No Calculations Done!"
                 else:
                     pass
         return duration
@@ -139,9 +138,21 @@ class Ticket(models.Model):
     name = models.CharField(max_length=500)
     unique_identifier = models.CharField(max_length=300, unique=True)
     status = models.ForeignKey(Status)
+    agent = models.ForeignKey(User)
     
     def __str__(self):
         return self.unique_identifier
+    
+    def get_duration(self):
+        events = Event.objects.filter(ticket_name=self.name)
+        duration = None
+        for event in events:
+            if event.duration:
+                if duration:
+                    duration += event.duration
+                else:
+                    duration = event.duration
+        return duration
 
 class Activity(models.Model):
     date = models.DateTimeField(auto_now_add=True)
