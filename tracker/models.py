@@ -63,11 +63,11 @@ class Type(models.Model):
     code = models.CharField(max_length=10)
 
     def __str__(self):
-        return "%s - %s" % (self.parent_team, self.name)
+        return self.name
     
     @property
-    def get_name(self):
-        return self.name
+    def get_representative_name(self):
+        return "%s - %s" % (self.parent_team, self.name)
 
 class SubType(models.Model):
     parent_type = models.ForeignKey(Type)
