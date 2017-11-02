@@ -94,7 +94,7 @@ class Event(models.Model):
     duration = models.DurationField(null=True, blank=True)
     
     def __str__(self):
-        return '[%s] %s' % (self.id, self.ticket_name)
+        return '[%s] %s - %s' % (self.id, self.ticket_name, self.task_type)
     @property
     def get_first_name(self):
         agent = User.objets.get(pk=self.agent)
@@ -162,7 +162,7 @@ class Activity(models.Model):
     ticket = models.ForeignKey(Ticket)
     
     def __str__(self):
-        return str(self.date)+str(self.agent)+str(self.action)
+        return "%s - %s - %s - %s" %(self.date, self.agent, self.action, self.ticket.name)
 
 def create_activity(sender, **kwargs):
     ''' Create activity when event is changed and compute for duration '''
