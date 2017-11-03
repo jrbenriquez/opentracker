@@ -35,7 +35,8 @@ def create_event(form):
             ticket = Ticket.objects.create(
                 name = ticket_name,
                 unique_identifier = unique_identifier,
-                status = status
+                status = status,
+                agent = agent
                 )
         quantity = form.cleaned_data['quantity']
         team = form.cleaned_data['team']

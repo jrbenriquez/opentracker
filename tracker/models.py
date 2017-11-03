@@ -138,7 +138,7 @@ class Ticket(models.Model):
     name = models.CharField(max_length=500)
     unique_identifier = models.CharField(max_length=300, unique=True)
     status = models.ForeignKey(Status)
-    agent = models.ForeignKey(User)
+    agent = models.ForeignKey(settings.AUTH_USER_MODEL)
     
     def __str__(self):
         return self.unique_identifier
@@ -181,9 +181,10 @@ def update_ticket_status(sender, **kwargs):
     ''' Update the status of the ticket after an activity is done '''
     activity = kwargs['instance']
     if activity:
+        print "saving ticket"
         update_ticket = Ticket.objects.filter(
             unique_identifier=activity.event.unique_identifier
-        ).update(status = activity.action)
+        ).update(status = activity.action, agent=activity.agent)
      
 post_save.connect(create_activity, sender=Event)
 #After saving activity update Ticket status
