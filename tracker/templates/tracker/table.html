@@ -87,8 +87,8 @@
                       <td class='clickable-row' data-href="{% url 'event' e.id %}" style='white-space: nowrap'><strong>{{ e.agent.first_name }}</strong></td>
                       
                       <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.task_type.name }}</td>
-                      <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.unique_identifier }}</td>
-                      <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.ticket_name }}</td>
+                      <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.unique_identifier|truncatechars:32 }}</td>
+                      <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.ticket_name|truncatechars:32 }}</td>
                       <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.quantity }}</td>
                 </tr>
                 {% endfor %}
