@@ -1,3 +1,14 @@
+.action-icon-start {
+    font-size: 50px;
+    margin-bottom: 0.2em;
+    color: green;
+}
+
+.action-icon-pause {
+    font-size: 50px;
+    margin-bottom: 0.2em;
+    color: orange;
+}
 .event-label {
     font-weight: bold;
 }

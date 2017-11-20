@@ -1,4 +1,4 @@
-{% extends 'tracker/base.html' %}
+{% extends 'tracker/index.html' %}
   
     {% block content %}
     
@@ -9,12 +9,8 @@
              <div>
               <strong>Filter (dynamic filter in the future):</strong> | Tickets Today | Events Today |
               <br>
-              <strong>Team View:</strong> <br>
-              {% for team in teams %}
-                 <a href="{% url 'team' team.id %}">{{ team }}</a> |
-              {% endfor %}
             </div>
-            <button style="margin: 0.5em" id="comment-button" class="btn btn-large">New</button>
+            
         </div>
       </div>
     </div>
@@ -25,7 +21,28 @@
     {% include 'tracker/misc/paginator.html' with objects=events only %}
       
     {% endblock content %}
-            
+           
+    {% block teams %}
+    
+    {% for team in teams %}
+        <li>
+              <a href="{% url 'team' team.id %}">{{ team }}</a>
+        </li>
+    {% endfor %}
+    
+    {% endblock teams %}
+    
+    {% block users %}
+    
+    {% for user in users %}
+        <li>
+              <a href="{% url 'user' user.id %}">{{ user }} - {{ user.team }} </a>
+        </li>
+    {% endfor %}
+    
+    {% endblock users %}
+    
+    
 
 
     {% block javascript %}

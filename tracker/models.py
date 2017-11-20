@@ -66,8 +66,8 @@ class Type(models.Model):
         return self.name
     
     @property
-    def get_name(self):
-        return self.name
+    def get_representative_name(self):
+        return "%s - %s" % (self.parent_team, self.name)
 
 class SubType(models.Model):
     parent_type = models.ForeignKey(Type)
@@ -94,7 +94,7 @@ class Event(models.Model):
     duration = models.DurationField(null=True, blank=True)
     
     def __str__(self):
-        return '[%s] %s' % (self.id, self.ticket_name)
+        return '[%s] %s - %s' % (self.id, self.ticket_name, self.task_type)
     @property
     def get_first_name(self):
         agent = User.objets.get(pk=self.agent)
@@ -111,15 +111,13 @@ class Event(models.Model):
             activity_set = Activity.objects.filter(event=self.id).order_by('date')
             print 'Found Activity! ' + str(len(activity_set)) 
             for activity in activity_set:
-                print '1'
                 if activity.action.start_event:
                     print 'Saw activity %s' % (activity.action.name)
                     start_activity = activity.date
                     print 'Start: ' + str(start_activity)
-                elif activity.action.stop_event:
+                elif activity.action.stop_event or activity.action.pause_event:
                     print 'Saw activity %s' % (activity.action.name)
                     stop_activity = activity.date
-                    print str(stop_activity)
                     print 'Stop: ' + str(stop_activity)
                     # If event started with a stop event don't do any calculations 
                     try:
@@ -130,7 +128,7 @@ class Event(models.Model):
                             duration = duration + latest_duration
                         print 'Duration: ' + str(duration)
                     except TypeError:
-                        pass
+                        print "No Calculations Done!"
                 else:
                     pass
         return duration
@@ -140,9 +138,21 @@ class Ticket(models.Model):
     name = models.CharField(max_length=500)
     unique_identifier = models.CharField(max_length=300, unique=True)
     status = models.ForeignKey(Status)
+    agent = models.ForeignKey(settings.AUTH_USER_MODEL)
     
     def __str__(self):
         return self.unique_identifier
+    
+    def get_duration(self):
+        events = Event.objects.filter(ticket_name=self.name)
+        duration = None
+        for event in events:
+            if event.duration:
+                if duration:
+                    duration += event.duration
+                else:
+                    duration = event.duration
+        return duration
 
 class Activity(models.Model):
     date = models.DateTimeField(auto_now_add=True)
@@ -152,7 +162,7 @@ class Activity(models.Model):
     ticket = models.ForeignKey(Ticket)
     
     def __str__(self):
-        return str(self.date)+str(self.agent)+str(self.action)
+        return "%s - %s - %s - %s" %(self.date, self.agent, self.action, self.ticket.name)
 
 def create_activity(sender, **kwargs):
     ''' Create activity when event is changed and compute for duration '''
@@ -171,9 +181,10 @@ def update_ticket_status(sender, **kwargs):
     ''' Update the status of the ticket after an activity is done '''
     activity = kwargs['instance']
     if activity:
+        print "saving ticket"
         update_ticket = Ticket.objects.filter(
             unique_identifier=activity.event.unique_identifier
-        ).update(status = activity.action)
+        ).update(status = activity.action, agent=activity.agent)
      
 post_save.connect(create_activity, sender=Event)
 #After saving activity update Ticket status

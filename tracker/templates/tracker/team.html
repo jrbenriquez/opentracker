@@ -1,4 +1,8 @@
-{% extends 'tracker/base.html' %}
+{% extends 'tracker/index.html' %}
+
+    {% block subheader %}
+    {{ team }}
+    {% endblock subheader %}
 
     {% block content %}
     <div class="container">
@@ -7,19 +11,7 @@
             <div>
                 <strong>Filter (dynamic filter in the future):</strong> | Tickets Today | Events Today |
                 <br>
-                <strong>Choose team:</strong> <br>
-                {% for t in teams %}
-                    {% if t == team %} <strong> {% endif %}
-                         <a href="{% url 'team' t.id %}">{{ t }}</a> |
-                    {% if t == team %} </strong> {% endif %}
-                {% endfor %}
-                <br>
-                <strong>Users:</strong> <br>
-                {% for u in users %}
-                    <a href="{% url 'user' u.id %}">{{ u }}</a> |
-                {% endfor %}
             </div>
-            <button style="margin: 0.5em" id="comment-button" class="btn btn-large">New</button>
         </div>
       </div>
     </div>
@@ -29,31 +21,29 @@
 
       
     {% endblock content %}
+    
+    {% block teams %}
+    
+    {% for team in teams %}
+        <li>
+              <a href="{% url 'team' team.id %}">{{ team }}</a>
+        </li>
+    {% endfor %}
+    
+    {% endblock teams %}
+    
+    {% block users %}
+    
+    {% for user in users_all %}
+        <li>
+              <a href="{% url 'user' user.id %}">{{ user }} - {{ user.team }} </a>
+        </li>
+    {% endfor %}
+    
+    {% endblock users %}
    
     {% block javascript %}
-         <script>
-        
-        function startEvent(eventID, statusID) {     
-                var formname = 'form_event_start_' + eventID + "_" + statusID;
-                document.forms[formname].elements["activity"].value = statusID;
-                document.getElementById(formname).submit();
-        
-        }
-        
-        function stopEvent(eventID, statusID) {     
-                var formname = 'form_event_stop_' + eventID + "_" + statusID;
-                document.forms[formname].elements["activity"].value = statusID;
-                document.getElementById(formname).submit();
-        
-        }
-        
-        function pauseEvent(eventID, statusID) {     
-                var formname = 'form_event_pause_' + eventID + "_" + statusID;
-                document.forms[formname].elements["activity"].value = statusID;
-                document.getElementById(formname).submit();
-        
-        }
-        </script>
+         {% include 'tracker/task/task_action_js.html' %}
     {% endblock javascript %}
 
 

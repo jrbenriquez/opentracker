@@ -1,0 +1,25 @@
+{% block javascript %}
+         <script>
+        
+        function startEvent(eventID, statusID) {     
+                var formname = 'form_event_start_' + eventID + "_" + statusID;
+                document.forms[formname].elements["activity"].value = statusID;
+                document.getElementById(formname).submit();
+        
+        }
+        
+        function stopEvent(eventID, statusID) {     
+                var formname = 'form_event_stop_' + eventID + "_" + statusID;
+                document.forms[formname].elements["activity"].value = statusID;
+                document.getElementById(formname).submit();
+        
+        }
+        
+        function pauseEvent(eventID, statusID) {     
+                var formname = 'form_event_pause_' + eventID + "_" + statusID;
+                document.forms[formname].elements["activity"].value = statusID;
+                document.getElementById(formname).submit();
+        
+        }
+        </script>
+    {% endblock javascript %}

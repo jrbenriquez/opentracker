@@ -1,23 +1,21 @@
     <div class="container">
       <div class="row">
-        <div class="col-xs-10">
+        <div class="col-xs-12">
           <div>
-            <table style="width:100%" class="table table-striped table-hover table-condensed table-responsive">
-                <tr>
-                  <th>Time&nbspStarted</th>
-                  <!-- <th>Time&nbspUpdated</th> -->
-                  <th>Actions</th>
-                  <th>Status</th>
-                  <!-- <th>Team</th> -->
-                  <!-- <th>Duration</th> -->
-                  <th>Agent</th>
-                  <th>Task&nbspType</th>
-                  <th>Ticket&nbspLink</th>
-                  <th>Ticket&nbspName</th>
-                  <th>Quantity</th>
-                  
-                  
-                </tr>
+            <table style="width:100%" class="table table-striped table-hover table-condensed table-bordered table-responsive">
+                    <tr style="background-color:#428bca;">
+                      <th>Time&nbspStarted</th>
+                      <!-- <th>Time&nbspUpdated</th> -->
+                      <th>Actions</th>
+                      <th>Status</th>
+                      <!-- <th>Team</th> -->
+                      <!-- <th>Duration</th> -->
+                      <th>Agent</th>
+                      <th>Task&nbspType</th>
+                      <th>Ticket&nbspLink</th>
+                      <th>Ticket&nbspName</th>
+                      <th>Quantity</th>
+                    </tr>
                 {% for e in events %}
                 <tr>
                       <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.timestamp_start }}</td>
@@ -89,8 +87,8 @@
                       <td class='clickable-row' data-href="{% url 'event' e.id %}" style='white-space: nowrap'><strong>{{ e.agent.first_name }}</strong></td>
                       
                       <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.task_type.name }}</td>
-                      <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.unique_identifier }}</td>
-                      <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.ticket_name }}</td>
+                      <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.unique_identifier|truncatechars:32 }}</td>
+                      <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.ticket_name|truncatechars:32 }}</td>
                       <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.quantity }}</td>
                 </tr>
                 {% endfor %}
