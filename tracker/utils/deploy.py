@@ -7,7 +7,7 @@ def post_deploy_setup():
             'code': 'IP',
             'start_event': True ,
             'pause_event': False,
-            'stop_event':  True,
+            'stop_event':  False,
             'default': True,
         },
         'On Hold': {
