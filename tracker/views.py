@@ -19,7 +19,8 @@ def create_event(form):
     if form.is_valid():
         # process the data in form.cleaned_data as required
         # Status.objects.all()[0]
-        status = form.cleaned_data['status']
+        # status = form.cleaned_data['status']
+        status = Status.objects.get(default=True)
         date_due = form.cleaned_data['date_due']
         agent = form.cleaned_data['agent']
         task_type = form.cleaned_data['task_type']
@@ -214,6 +215,7 @@ def event(request, event_id):
         'status_start': status_start,
         'status_pause': status_pause,
         'status_stop': status_stop,
+        'parent_page': 'home',
     }
     
     return render(request, 'tracker/event.html', context)
@@ -224,8 +226,13 @@ def new(request):
         #Get the previous page the new request was created
         referrer = request.META['HTTP_REFERER'].split('/')
         parent_page = referrer[3]
+        #Get Default Status
+        status = Status.objects.get(default=True)
+        initial_dict = {
+            'status': status.id,
+        }
         #If it is from the home page, throw a basic empty EventForm
-        if not parent_page:
+        if not parent_page or parent_page == 'event':
             form = EventForm()
             context = {
                         'form': form,

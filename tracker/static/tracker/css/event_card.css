@@ -1,11 +1,14 @@
+#page-top > div > div > div.card.mb-3 > div.card-body{
+    font-size: 75%;
+}
 .action-icon-start {
-    font-size: 50px;
+    font-size: 25px;
     margin-bottom: 0.2em;
     color: green;
 }
 
 .action-icon-pause {
-    font-size: 50px;
+    font-size: 25px;
     margin-bottom: 0.2em;
     color: orange;
 }
