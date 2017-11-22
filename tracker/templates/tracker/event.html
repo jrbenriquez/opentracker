@@ -1,5 +1,6 @@
 {% extends 'tracker/index.html' %}
 {% load static %}
+{% load tracker_filters %}
 
     {% block subheader %}
     View Event
@@ -119,7 +120,7 @@
                         <p><span class="event-label">Duration</p></span>
                     </div>
                     <div class='col-xs-4'>
-                        <p>{{ event.duration }}</p></span>
+                        <p>{{ event.duration|task_duration:'verbose' }}</p></span>
                     </div>
                 </div>
                 <p>.</p>

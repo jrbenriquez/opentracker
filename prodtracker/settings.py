@@ -42,7 +42,9 @@ INSTALLED_APPS = [
     'tracker',
     'widget_tweaks',
     'crispy_forms',
-]
+    'explorer',
+    'report',
+    ]
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',

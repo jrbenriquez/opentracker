@@ -27,4 +27,6 @@ urlpatterns = [
     url(r'^event/(?P<event_id>[0-9]+)/$', views.event, name='event'),
     url(r'^event/new/$', views.new, name='new'),
     url(r'^event/new/(?P<parent_page>[A-z]+)/$', views.new_submit, name='new_submit'),
+    url(r'^explorer/', include('explorer.urls')),
+    #url(r'^reports/', include('reporting.urls'), name='reports')
 ]
