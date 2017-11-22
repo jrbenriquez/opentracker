@@ -16,9 +16,9 @@ class EventForm(ModelForm):
         attrs={'type' : 'date'}), label='Date Due', initial=datetime.date.today)
     class Meta:
         model = Event
-        fields = ['status', 'task_type', 'agent', 'team',
+        fields = ['task_type', 'agent', 'team',
                     'unique_identifier', 'ticket_name', 'quantity', 'date_due']
-        exclude =('timestamp_end', 'timestamp_pause','duration')
+        exclude =('timestamp_end', 'timestamp_pause','duration','status')
         labels = {
             "unique_identifier": "Ticket Link/ID"
         }
@@ -37,7 +37,6 @@ class EventForm(ModelForm):
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
             Div(
-                Div('status', css_class="col-sm-4"),
                 Div('team', css_class="col-sm-4"),
                 Div('task_type', css_class="col-sm-4"),
                 css_class = 'row'

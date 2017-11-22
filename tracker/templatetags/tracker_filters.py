@@ -6,7 +6,10 @@ register = template.Library()
 
 @register.filter(name='task_duration')
 def task_duration(td, arg='simple'):
-    total_seconds = int(td.total_seconds())
+    try:
+        total_seconds = int(td.total_seconds())
+    except AttributeError:
+        return 'None'
     hours = total_seconds // 3600
     minutes = (total_seconds % 3600) // 60
     seconds =  ((total_seconds % 3600) % 60)
