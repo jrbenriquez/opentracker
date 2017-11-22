@@ -14,6 +14,8 @@ from django.forms.extras.widgets import SelectDateWidget
 class EventForm(ModelForm):
     date_due = forms.DateField(widget=forms.TextInput(
         attrs={'type' : 'date'}), label='Date Due', initial=datetime.date.today)
+    received_date = forms.DateField(widget=forms.TextInput(
+        attrs={'type' : 'date'}), label='Received Date', initial=datetime.date.today)
     class Meta:
         model = Event
         fields = ['task_type', 'agent', 'team',
@@ -52,7 +54,9 @@ class EventForm(ModelForm):
                 css_class = 'row'
             ),
             Div(
-                Div('quantity', css_class="col-sm-6"),
+                Div('quantity', css_class="col-sm-2"),
+                Div('received_date', css_class="col-sm-5"),
+
                 css_class = 'row'
             ),
             Submit('submit', u'Submit', css_class='btn btn-success'),
