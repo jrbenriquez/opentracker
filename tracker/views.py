@@ -1,3 +1,6 @@
+import datetime
+import pytz
+
 from django.shortcuts import render
 from django.contrib import messages
 from django.core.urlresolvers import reverse_lazy
@@ -14,7 +17,15 @@ from datetime import date
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic.edit import CreateView
 
+
+def localtime_to_utc(time):
+    local = pytz.timezone("Asia/Manila")
+    local_dt = local.localize(time, is_dst=None)
+    utc_dt = local_dt.astimezone (pytz.utc)
+    return utc_dt
+
 def create_event(form):
+    # Individual Event only. NEXT TODO: Group Event for multiple users
     # check whether it's valid:
     if form.is_valid():
         # process the data in form.cleaned_data as required
@@ -25,11 +36,14 @@ def create_event(form):
         agent = form.cleaned_data['agent']
         task_type = form.cleaned_data['task_type']
         # task_sub_type = SubType.objects.get_or_none(pk=request.POST.get('task_sub_type'))
-        #Ticket Check Block
+        # Ticket Check Block
         # Creates a ticket if it does not exist
         unique_identifier = form.cleaned_data['unique_identifier']
         ticket_name = form.cleaned_data['ticket_name']
-        
+        # Combine Received Date and time -> ToDo : Edit form to pass both Datetime (datetime-local)
+        received_date = form.cleaned_data['received_date']
+        received_time = form.cleaned_data['received_time']
+        received = localtime_to_utc(datetime.datetime.combine(received_date, received_time))
         if Ticket.objects.filter(unique_identifier=unique_identifier).exists():
             ticket_name = Ticket.objects.get(unique_identifier=unique_identifier)
         else:
@@ -50,6 +64,7 @@ def create_event(form):
             ticket_name=ticket_name,
             quantity=quantity,
             team=team,
+            received=received,
         )
     else:
         pass

@@ -92,6 +92,7 @@ class Event(models.Model):
     quantity = models.IntegerField()
     team = models.ForeignKey(Team)
     duration = models.DurationField(null=True, blank=True)
+    received = models.DateTimeField(null=True, blank=True)
     
     def __str__(self):
         return '[%s] %s - %s' % (self.id, self.ticket_name, self.task_type)
