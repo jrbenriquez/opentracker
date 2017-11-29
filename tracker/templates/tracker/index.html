@@ -90,7 +90,7 @@
       </ul>
       <ul class="navbar-nav ml-auto">
         <li class="nav-item">
-          <button style="margin: 0.5em" id="comment-button" class="btn btn-large">New Event</button>
+          <button style="margin: 0.5em" id="new-button" class="btn btn-large">New Event</button>
         <li/>
         <li class="nav-item">
           <form class="form-inline my-2 my-lg-0 mr-lg-2">
@@ -209,7 +209,7 @@
                  });
              });
          }
-         $('#comment-button').click(function() {
+         $('#new-button').click(function() {
              $('#form-modal-body').load('{% url 'new' %}', function () {
                  $('#new_event').modal('toggle');
                  formAjaxSubmit('#form-modal-body form', '#new_event');

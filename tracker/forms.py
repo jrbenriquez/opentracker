@@ -1,4 +1,6 @@
 import datetime
+import pytz
+
 from django import forms
 from django.forms import ModelForm
 from tracker.models import Event, User, Team, Type
@@ -7,13 +9,28 @@ from django.core.urlresolvers import reverse
 from crispy_forms.layout import Submit, Layout, Div, Button, Fieldset
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.forms.extras.widgets import SelectDateWidget
+from django.utils.timezone import now
 
 # Make dynamic field for Type form
 # DRY
 # Inherit Forms from EventForm!
+
+# Custom Time function coz i can't set initial time in form using HTML5 type datetime-local
+# and time :( I can only set date T_T
+def get_time():
+    local_tz = pytz.timezone('Asia/Manila')
+    utc_dt = datetime.datetime.now()
+    local_dt = utc_dt.replace(tzinfo=pytz.utc).astimezone(local_tz)
+    return local_tz.normalize(local_dt).strftime("%H:%M")
+
 class EventForm(ModelForm):
     date_due = forms.DateField(widget=forms.TextInput(
         attrs={'type' : 'date'}), label='Date Due', initial=datetime.date.today)
+    received_date = forms.DateField(widget=forms.TextInput(
+        attrs={'type' : 'date'}), label='Received Date', initial=datetime.date.today)
+    received_time = forms.TimeField(widget=forms.TextInput(
+        attrs={'type' : 'time'}), label='Received Time', initial=get_time)
+
     class Meta:
         model = Event
         fields = ['task_type', 'agent', 'team',
@@ -52,15 +69,17 @@ class EventForm(ModelForm):
                 css_class = 'row'
             ),
             Div(
-                Div('quantity', css_class="col-sm-5"),
-                Div('received_date', css_class="col-sm-5"),
+                Div('quantity', css_class="col-sm-3"),
+                Div('received_date', css_class="col-sm-4"),
+                Div('received_time', css_class="col-sm-4"),
 
                 css_class = 'row'
             ),
             Submit('submit', u'Submit', css_class='btn btn-success'),
         )
         self.helper.form_action = reverse('new')
-        self.helper.form_tag = False           
+        self.helper.form_tag = False 
+    
 class TeamEventForm(EventForm):
     team = forms.ModelChoiceField(Team)
     date_due = forms.DateField(widget=forms.TextInput(

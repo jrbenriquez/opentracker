@@ -81,10 +81,10 @@
                         <p>{{ event.date_due }}</p></span>
                     </div>
                     <div class='col-md-2'>
-                        <p><span class="event-label">Status</p></span>
+                        <p><span class="event-label">Received</p></span>
                     </div>
                     <div class='col-md-4'>
-                        <p><span class="label {% if event.status.start_event %}label-success{% elif event.status.pause_event %}label-danger{% elif event.status.stop_event %}label-success{% endif %}">{{ event.status }}</p></span>
+                        <p>{{ event.received }}</p></span>
                     </div>
                 </div>
                 <div class='col-md-12'>
@@ -95,10 +95,10 @@
                         <p>{{ event.team }}</p></span>
                     </div>
                     <div class='col-md-2'>
-                        <p><span class="event-label">Task Type</p></span>
+                        <p><span class="event-label">Status</p></span>
                     </div>
                     <div class='col-md-4'>
-                        <p><span class="label label-info">{{ event.task_type }}</p></span>
+                        <p><span class="label {% if event.status.start_event %}label-success{% elif event.status.pause_event %}label-danger{% elif event.status.stop_event %}label-success{% endif %}">{{ event.status }}</p></span>
                     </div>
                 </div>
                 <div class='col-md-12'>
@@ -109,10 +109,10 @@
                         <p>{{ event.agent }}</p></span>
                     </div>
                     <div class='col-md-2'>
-                        <p><span class="event-label">Quantity</p></span>
+                        <p><span class="event-label">Task Type</p></span>
                     </div>
                     <div class='col-md-4'>
-                        <p><span class="label label-info">{{ event.quantity }}</p></span>
+                        <p><span class="label label-info">{{ event.task_type }}</p></span>
                     </div>
                 </div>
                 <div class='col-md-12'>
@@ -121,6 +121,12 @@
                     </div>
                     <div class='col-md-4'>
                         <p>{{ event.duration|task_duration:'verbose' }}</p></span>
+                    </div>
+                    <div class='col-md-2'>
+                        <p><span class="event-label">Quantity</p></span>
+                    </div>
+                    <div class='col-md-4'>
+                        <p><span class="label label-info">{{ event.quantity }}</p></span>
                     </div>
                 </div>
                 <p>.</p>
