@@ -38,11 +38,69 @@ def post_deploy_setup():
     # Create Team
     team_dict = {
         'Reporting': {
-            'team_code': 'REP'
+            'team_code': 'REP',
+            'tasks': [
+                ['AdHoc', 'ADHOC'],
+                ['Insights Deck', 'INSDE'],
+                ['Insights QBR', 'INSQBR'],
+                ['Insights Queries', 'INSQRY'],
+                ['Internal Work', 'INWRK'],
+                ['Pixel Split', 'PXSPLT'],
+                ['Report Adjustment', 'REPADJ'],
+                ['Report Request', 'REPREQ'],
+                ['Report Setup', 'REPREQ'],
+                ['Scheduled Report', 'SCHREP'],
+                ['Support Request', 'SUPREQ'],
+            ],
         },
         'Mapping': {
-            'team_code': 'MAP'
-        }
+            'team_code': 'MAP',
+            'tasks': [
+                ['AdHoc', 'ADHOC'],
+                ['Adjustment', 'ADJ'],
+                ['Discrepancy Investigation', 'DSCRINV'],
+                ['DSP Check', 'DSPCHK'],
+                ['Manual Upload', 'MANUPL'],
+                ['New Request', 'NEWREQ'],
+                ['Pipeline Investigation', 'PIPINV'],
+            ],
+        },
+        'Inventory Quality': {
+            'team_code': 'IQ',
+            'tasks': [
+                ['Review', 'REVIEW'],
+                ['New Request', 'NEWREQ'],
+                ['QA', 'QA'],
+                ['Setup', 'STP'],
+            ],
+        },
+        'Screens': {
+            'team_code': 'SCR',
+            'tasks': [
+                ['New Request', 'NEWREQ'],
+                ['Kickback', 'KCKBCK'],
+                ['New Report', 'NEWREP'],
+                ]
+        },
+        'Others': {
+            'team_code': 'OTH',
+            'tasks': [
+                ['Admin', 'ADMIN'],
+                ['Assist', 'ASST'],
+                ['Audit', 'AUDT'],
+                ['Buddy QA', 'BDYQA'],
+                ['Client Call', 'CLIECLL'],
+                ['Coaching', 'CCHING'],
+                ['Cross Utilization', 'XUTIL'],
+                ['Documentation', 'DOCU'],
+                ['QA', 'QA'],
+                ['Special Projects', 'SPPROJ'],
+                ['System Downtime', 'DWNTME'],
+                ['Team Meeting', 'TMEET'],
+                ['Client Training', 'CLITRN'],
+                ['Internal Training', 'INTTRN'],
+                ]
+        },
     }
     
     for team in team_dict:
@@ -50,17 +108,12 @@ def post_deploy_setup():
             name=team,
             team_code=team_dict[team]['team_code'],
             )
-    # Create Tasks 
-    task_dict = {
-        'Scheduled Report': {
-            'parent_team': Team.objects.get(name='Reporting'),
-            'code': 'SCHREP',
-        }
-    }
+        # Create Tasks 
+        for task in team_dict[team]['tasks']:
+            Type.objects.create(
+                name=task[0],
+                parent_team=Team.objects.get(name=team),
+                code=task[1],
+                )
     
-    for task in task_dict:
-        Type.objects.create(
-            name=task,
-            parent_team=task_dict[task]['parent_team'],
-            code=task_dict[task]['code'],
-            )
+    
