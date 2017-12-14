@@ -1,5 +1,6 @@
 {% load static %}
 {% load widget_tweaks %}
+{% load crispy_forms_tags %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -122,6 +123,15 @@
       <!-- Area Chart Example-->
       <div class="card mb-3">
         <div class="card-header">
+          <i class="fa fa-area-chart"></i> New Event </div>
+        <div class="card-body">
+        {% block form %}
+        {% endblock form %}
+        </div>
+        <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
+      </div>
+      <div class="card mb-3">
+        <div class="card-header">
           <i class="fa fa-area-chart"></i> Events</div>
         <div class="card-body">
           {% block content %}
@@ -215,6 +225,7 @@
                  formAjaxSubmit('#form-modal-body form', '#new_event');
              });
          });
+         
          
     </script>
     {% block javascript %}

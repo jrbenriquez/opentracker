@@ -8,7 +8,9 @@ from django.http import HttpResponseRedirect
 from django.http import QueryDict
 from django.views.generic.edit import FormView
 from django.contrib.messages.views import SuccessMessageMixin
-from tracker.models import Event, User, Team, Status, Type, SubType, Ticket
+from tracker.models import (
+    Event, User, Team, Status, Type, SubType, Ticket, LabelValue, LabelTag
+    )
 from tracker.forms import (
     EventForm, TeamEventForm, TrackerUserCreationForm
     )
@@ -55,7 +57,7 @@ def create_event(form):
                 )
         quantity = form.cleaned_data['quantity']
         team = form.cleaned_data['team']
-        Event.objects.create(
+        event = Event.objects.create(
             status=status,
             date_due=date_due,
             agent=agent,
@@ -66,8 +68,33 @@ def create_event(form):
             team=team,
             received=received,
         )
+        return event
     else:
         pass
+
+def create_label(request, event_id):
+    #Get Values from request
+    new_tag = request.POST.get('label-tag')
+    new_value = request.POST.get('label-value')
+    print new_tag
+    print new_value
+    event = Event.objects.get(pk=event_id)
+    # If tag submitted does not exist, create it else select existing tag
+    if not LabelTag.objects.filter(name=new_tag).exists():
+        tag = LabelTag.objects.create(
+            name=new_tag,
+            )
+        tag.event.add(event)
+    else:
+        tag = LabelTag.objects.get(name=new_tag)
+        tag.event.add(event)
+    # Create value linked to selected tag
+    label = LabelValue.objects.create(
+        value=new_value,
+        tag=tag,
+        )
+    return label
+    
 
 def start_event(request):
     # POST request requirements:
@@ -116,7 +143,7 @@ def home(request):
     form = EventForm()
     events_list = Event.objects.order_by('-timestamp_updated', 'status')
     page = request.GET.get('page', 1)
-    paginator = Paginator(events_list, 25)
+    paginator = Paginator(events_list, 10)
     try:
         events = paginator.page(page)
     except PageNotAnInteger:
@@ -146,12 +173,20 @@ def team(request, team_id):
     if request.method == 'POST':
         if request.POST.get('action') == 'start':
             start_event(request)
-        elif request.POST.get('action') == 'stop':
+        elif request.POST.get('action   ') == 'stop':
             stop_event(request)
         elif request.POST.get('action') == 'pause':
             pause_event(request)
-    events = Event.objects.filter(
+    events_list = Event.objects.filter(
         team=team_id).order_by('-timestamp_updated', 'status')
+    page = request.GET.get('page', 1)
+    paginator = Paginator(events_list, 10)
+    try:
+        events = paginator.page(page)
+    except PageNotAnInteger:
+        events = paginator.page(1)
+    except EmptyPage:
+        events = paginator.page(paginator.num_pages)
     status_start = Status.objects.filter(start_event=True)
     status_pause = Status.objects.filter(pause_event=True)
     status_stop = Status.objects.filter(stop_event=True)
@@ -187,8 +222,16 @@ def user(request, user_id):
             stop_event(request)
         elif request.POST.get('action') == 'pause':
             pause_event(request)
-    events = Event.objects.filter(
+    events_list = Event.objects.filter(
         agent=user_id).order_by('-timestamp_updated', 'status')
+    page = request.GET.get('page', 1)
+    paginator = Paginator(events_list, 10)
+    try:
+        events = paginator.page(page)
+    except PageNotAnInteger:
+        events = paginator.page(1)
+    except EmptyPage:
+        events = paginator.page(paginator.num_pages)
     # Status Change variables
     status_start = Status.objects.filter(start_event=True)
     status_pause = Status.objects.filter(pause_event=True)
@@ -197,6 +240,11 @@ def user(request, user_id):
     teams = Team.objects.order_by('id')
     user = User.objects.get(pk=user_id)
     users = User.objects.order_by('username')
+    initial_dict ={
+        'team': user.team.id,
+        'agent': user.id
+        }
+    form = TeamEventForm(initial=initial_dict)
     context = {
             'events': events,
             'status_start': status_start,
@@ -207,12 +255,17 @@ def user(request, user_id):
             'team': team,
             'user' : user,
             'parent_page': 'user',
-            'id' : user.id
+            'parent_object': user,
+            'id' : user.id,
+            'form' : form,
         }
     return render(request, 'tracker/user.html', context)
 
 def event(request, event_id):
     #Table Actions using POST
+    # ToDo: Create own views for table action....
+    # Too repetitive
+    # Then Best practice: Convert all views to Generic View
     print request.POST
     if request.method == 'POST':
         if request.POST.get('action') == 'start':
@@ -221,21 +274,28 @@ def event(request, event_id):
             stop_event(request)
         elif request.POST.get('action') == 'pause':
             pause_event(request)
+        elif request.POST.get('action') == 'add-label':
+            create_label(request, event_id)
+    
     event = Event.objects.get(pk=event_id)
     status_start = Status.objects.filter(start_event=True)
     status_pause = Status.objects.filter(pause_event=True)
     status_stop = Status.objects.filter(stop_event=True)
+    labels = {}
+    for label_value in LabelValue.objects.filter(tag__event=event_id):
+        labels[label_value.tag.name] = label_value.value
     context = {
         'event': event,
         'status_start': status_start,
         'status_pause': status_pause,
         'status_stop': status_stop,
         'parent_page': 'home',
+        'labels': labels,
     }
     
     return render(request, 'tracker/event.html', context)
     
-
+# DELETE THIS? NO MORE USE
 def new(request):
     if request.method == 'GET':
         #Get the previous page the new request was created
@@ -287,20 +347,34 @@ def new_submit(request, parent_page):
     print request.method
     if request.method == 'POST':
         parent_id = request.POST.get('team')
-        if parent_page == 'team':
+        if parent_page == 'team' or parent_page == 'user':
             parent_object = Team.objects.get(pk=parent_id)
             form = TeamEventForm(request.POST, initial={'team': parent_id})
-        elif parent_page == 'user':
-            parent_object = User.objects.get(pk=parent_id)
         #Error if not user or team
-        print parent_id
         if form.is_valid():
-            create_event(form)
-            return HttpResponseRedirect('/')
+            event = create_event(form)
+            status_start = Status.objects.filter(start_event=True)
+            status_pause = Status.objects.filter(pause_event=True)
+            status_stop = Status.objects.filter(stop_event=True)
+            labels = {}
+            for label_value in LabelValue.objects.filter(tag__event=event.id):
+                labels[label_value.tag.name] = label_value.value
+            context = {
+                'event': event,
+                'status_start': status_start,
+                'status_pause': status_pause,
+                'status_stop': status_stop,
+                'parent_page': 'home',
+                'labels': labels,
+            }
+            return render(request, 'tracker/event.html', context)
         else:
+            print form.errors
             messages.error(request, "Please correct the errors below and resubmit.")
-            return render(request, 'tracker/new_event.html', {'form': form})
-
+            if parent_page == 'team':
+                return render(request, 'tracker/team.html', {'form': form})
+            elif parent_page == 'user':
+                return render(request, 'tracker/user.html', {'form': form})
 
 class NewUserView(CreateView):
     template_name = 'tracker/user/user_new.html'

@@ -129,6 +129,43 @@
                         <p><span class="label label-info">{{ event.quantity }}</p></span>
                     </div>
                 </div>
+                <div class='col-md-12'>
+                    <div class='col-md-2'>
+                        <p><span class="event-label">Additional Labels</p></span>
+                    </div>
+                    <div class='col-md-2'>
+                        <p><span id="add-label"><a href="javascript:void(0)">Add Label</a></span></p>
+                        <span id="add-label-form" class='hidden'>
+                            <form action="{% url 'event' event.id %}" method="post">
+                                {% csrf_token %}
+                                <label for="label-tag">Name:</label>
+                                <input  type="hidden" name="action" value="add-label">
+                                <input  name="label-tag" list="available-labels">
+                                <datalist id="available-labels">
+                                {% for label in labels %}
+                                <option value=label.name>
+                                {% endfor %}
+                                <option value="test">
+                                </datalist>
+                                <label for="label-value">Value:</label>
+                                <input type="text" name="label-value"></input>
+                                <input type="submit">
+                        </span>
+                    </div>
+                </div>
+                
+                {% if labels %}
+                    {% for tag, value in labels.items %}
+                <div class='col-md-12'>
+                    <div class='col-md-2'>
+                        <p><span class="event-label">{{ tag }}</p></span>
+                    </div>
+                    <div class='col-md-4'>
+                        <p>{{ value }}</p></span>
+                    </div>
+                </div>
+                    {% endfor %}
+                {% endif %}
                 <p>.</p>
             </div>
           </div>
@@ -194,6 +231,10 @@
 
     {% block javascript %}
          <script>
+        $( "#add-label" ).click(function() {
+            $("#add-label").addClass('hidden');
+            $("#add-label-form").removeClass('hidden');
+        });
         
         function startEvent(eventID, statusID) {     
                 var formname = 'form_event_start_' + eventID + "_" + statusID;
@@ -215,7 +256,9 @@
                 document.getElementById(formname).submit();
         
         }
+        
         </script>
+        
     {% endblock javascript %}
 
     

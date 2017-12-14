@@ -10,6 +10,7 @@ from crispy_forms.layout import Submit, Layout, Div, Button, Fieldset
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.forms.extras.widgets import SelectDateWidget
 from django.utils.timezone import now
+from django.db.models import Q
 
 # Make dynamic field for Type form
 # DRY
@@ -30,7 +31,7 @@ class EventForm(ModelForm):
         attrs={'type' : 'date'}), label='Received Date', initial=datetime.date.today)
     received_time = forms.TimeField(widget=forms.TextInput(
         attrs={'type' : 'time'}), label='Received Time', initial=get_time)
-
+    # lclean method
     class Meta:
         model = Event
         fields = ['task_type', 'agent', 'team',
@@ -54,31 +55,46 @@ class EventForm(ModelForm):
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
             Div(
-                Div('team', css_class="col-sm-4"),
-                Div('task_type', css_class="col-sm-4"),
+                Div('team', css_class="col-sm-2"),
+                Div('task_type', css_class="col-sm-2"),
+                Div('agent', css_class="col-sm-2"),
                 css_class = 'row'
             ),
             Div(
-                Div('agent', css_class="col-sm-3"),
-                Div('unique_identifier', css_class="col-sm-9"),
+                Div('unique_identifier', css_class="col-sm-8"),
                 css_class = 'row'
             ),
             Div(
                 Div('ticket_name', css_class="col-sm-6"),
-                Div('date_due', css_class="col-sm-6"),
+                Div('date_due', css_class="col-sm-4"),
                 css_class = 'row'
             ),
             Div(
-                Div('quantity', css_class="col-sm-3"),
-                Div('received_date', css_class="col-sm-4"),
-                Div('received_time', css_class="col-sm-4"),
+                Div('quantity', css_class="col-sm-2"),
+                Div('received_date', css_class="col-sm-2"),
+                Div('received_time', css_class="col-sm-2"),
 
                 css_class = 'row'
             ),
             Submit('submit', u'Submit', css_class='btn btn-success'),
         )
         self.helper.form_action = reverse('new')
-        self.helper.form_tag = False 
+        self.helper.form_tag = False
+
+    def clean(self):
+        cleaned_data = super(EventForm, self).clean()
+        team = cleaned_data.get("team")
+        task_type = cleaned_data.get("task_type")
+        try:
+            if task_type.parent_team != team:
+                print task_type
+                print team
+                raise forms.ValidationError(
+                    "Invalid Task Type for Team"
+                    )
+        except AttributeError:
+            raise forms.ValidationError("No Task Type Selected")
+        return cleaned_data
     
 class TeamEventForm(EventForm):
     team = forms.ModelChoiceField(Team)
@@ -92,9 +108,9 @@ class TeamEventForm(EventForm):
         print team_object, team_id
         self.fields['team'].widget.attrs['initial'] = team_id
         self.fields['team'].widget.attrs['readonly'] = True
-        self.fields['task_type'].queryset = Type.objects.filter(parent_team=team_id)
+        self.fields['task_type'].queryset = Type.objects.filter(Q(parent_team=team_id) | Q(parent_team__name='Others'))
         self.fields['agent'].queryset = User.objects.filter(team=team_id)
-        self.fields['team'].queryset = Team.objects.filter(pk=team_id)
+        self.fields['team'].queryset = Team.objects.filter(Q(pk=team_id) | Q(name='Others'))
 
 class TrackerUserCreationForm(UserCreationForm):
     

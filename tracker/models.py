@@ -93,7 +93,8 @@ class Event(models.Model):
     team = models.ForeignKey(Team)
     duration = models.DurationField(null=True, blank=True)
     received = models.DateTimeField(null=True, blank=True)
-    
+    additional_details = models.CharField(max_length=512, null=True, blank=True)
+
     def __str__(self):
         return '[%s] %s - %s' % (self.id, self.ticket_name, self.task_type)
     @property
@@ -134,6 +135,14 @@ class Event(models.Model):
                     pass
         return duration
         
+
+class LabelTag(models.Model):
+    name = models.CharField(max_length=128, unique=True)
+    event = models.ManyToManyField(Event)
+
+class LabelValue(models.Model):
+    tag = models.ForeignKey(LabelTag)
+    value = models.CharField(max_length=128)
 
 class Ticket(models.Model):
     name = models.CharField(max_length=500)
