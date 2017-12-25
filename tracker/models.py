@@ -94,7 +94,9 @@ class Event(models.Model):
     duration = models.DurationField(null=True, blank=True)
     received = models.DateTimeField(null=True, blank=True)
     additional_details = models.CharField(max_length=512, null=True, blank=True)
-
+    #used for group tasks
+    relates_to = models.ForeignKey('self', null=True, blank=True)
+    
     def __str__(self):
         return '[%s] %s - %s' % (self.id, self.ticket_name, self.task_type)
     @property

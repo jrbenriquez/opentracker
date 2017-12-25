@@ -1,0 +1,9 @@
+
+         <script>
+                $( ".select-action" ).change(function() {
+                    action_id = $(this).val()
+                    event = $(this).attr('id').split('_')[0]
+                    $('#'+event+"_form").submit()
+                });
+        
+        </script>

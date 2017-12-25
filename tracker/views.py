@@ -107,22 +107,22 @@ def start_event(request):
     # POST request requirements:
     # event -> key of event
     # activity -> key of status
-    print request.POST.get('activity')
+    print request.POST.get('status')
     eventid = request.POST.get('event')
     event = Event.objects.get(pk=eventid)
-    event.status = Status.objects.get(pk=request.POST.get('activity'))
+    event.status = Status.objects.get(pk=request.POST.get('status'))
     print event.status
-    print "Activity detected is: " + request.POST.get('activity')
+    print "Activity detected is: " + request.POST.get('status')
     event.save()
 
 def stop_event(request):
     # POST request requirements:
     # event -> key of event
     # activity -> key of status
-    print request.POST.get('activity')
+    print request.POST.get('status')
     eventid = request.POST.get('event')
     event = Event.objects.get(pk=eventid)
-    event.status = Status.objects.get(pk=request.POST.get('activity'))
+    event.status = Status.objects.get(pk=request.POST.get('status'))
     event.duration = event.get_duration()
     event.save()
 
@@ -130,10 +130,10 @@ def pause_event(request):
     # POST request requirements:
     # event -> key of event
     # activity -> key of status
-    print request.POST.get('activity')
+    print request.POST.get('status')
     eventid = request.POST.get('event')
     event = Event.objects.get(pk=eventid)
-    event.status = Status.objects.get(pk=request.POST.get('activity'))
+    event.status = Status.objects.get(pk=request.POST.get('status'))
     event.duration = event.get_duration()
     event.save()
 
@@ -233,12 +233,14 @@ def home(request):
 @login_required(login_url='/login/')    
 def track(request):
     if request.method == 'POST':
-        if request.POST.get('action') == 'start':
-            start_event(request)
-        elif request.POST.get('action') == 'stop':
-            stop_event(request)
-        elif request.POST.get('action') == 'pause':
-            pause_event(request)
+        if request.POST.get('action') == 'status_change':
+            new_status = Status.objects.get(pk=request.POST.get('status'))
+            if new_status.start_event:
+                start_event(request)
+            elif new_status.stop_event:
+                stop_event(request)
+            elif new_status.pause_event:
+                pause_event(request)
     form = EventForm()
     events_list = Event.objects.order_by('-timestamp_updated', 'status')
     page = request.GET.get('page', 1)
@@ -252,6 +254,7 @@ def track(request):
     status_start = Status.objects.filter(start_event=True)
     status_stop = Status.objects.filter(stop_event=True)
     status_pause = Status.objects.filter(pause_event=True)
+    statuses = Status.objects.all()
     teams = Team.objects.order_by('id')
     users = User.objects.order_by('username')
     types = Type.objects.order_by('id')
@@ -259,6 +262,7 @@ def track(request):
         'teams': teams,
         'users': users,
         'types': types,
+        'statuses': statuses,
         }
     context = {
             'form': form,
@@ -478,18 +482,8 @@ def new_submit(request, parent_page):
             status_start = Status.objects.filter(start_event=True)
             status_pause = Status.objects.filter(pause_event=True)
             status_stop = Status.objects.filter(stop_event=True)
-            labels = {}
-            for label_value in LabelValue.objects.filter(tag__event=event.id):
-                labels[label_value.tag.name] = label_value.value
-            context = {
-                'event': event,
-                'status_start': status_start,
-                'status_pause': status_pause,
-                'status_stop': status_stop,
-                'parent_page': 'home',
-                'labels': labels,
-            }
-            return redirect('track')
+            redirect_url = 'event'
+            return redirect(redirect_url, event_id=event.id)
         else:
             print form.errors
             messages.error(request, "Please correct the errors below and resubmit.")

@@ -7,7 +7,7 @@
                     <tr style="background-color:#428bca;">
                       <!-- <th>Duration</th> -->
                       <!-- <th>Time&nbspUpdated</th> -->
-                      <th>Actions</th>
+                      <!-- <th>Actions</th> -->
                       <th>Status</th>
                       <!-- <th>Due Date</th> -->
                       <!-- <th>Team</th> -->
@@ -24,7 +24,18 @@
                       <!-- <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.duration|task_duration:'simple' }}</td> -->
                       <!-- <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.timestamp_start }}</td> -->
                       <!-- <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.timestamp_updated }}</td> -->
-                      <td style='white-space: nowrap;' align="center">
+                      <!-- <td style='white-space: nowrap;' align="center">
+                          <form action="{% url 'new_submit' 'team' %}" method="post">
+                            {% csrf_token %}
+                            <div id="div_id_actions" class="form-group">
+                                <div class="controls ">
+                                    <select class="select form-control" id="{{ e.id }}_actions" name="team">
+                                        <option value="1">In Progress</option>
+                                        <option value="2">Done</option>
+                                    </select>
+                                </div>
+                            </div>
+                          </form>
                         {% if e.status.start_event %}
                         
                         {% for s in status_pause %}
@@ -84,8 +95,31 @@
                         No Action
                         {% endif %}
         
+                      </td> -->
+                      <td class='' data-href="{% url 'event' e.id %}" style='white-space: nowrap;' bgcolor={% if e.status.start_event %}"#ffff66" {% elif e.status.pause_event %}"#ff6666"{% else %}"#33ff77"{% endif %}>
+                          <!-- EXPAND FORM OUTSIDE TO ALL TABLE SO PWEDE NA MAG MULTI ACTIONS SA ISANG SUBMIT -->
+                          <form id="{{ e.id }}_form"action="{% url 'track' %}" method="post" class="form-inline">
+                            {% csrf_token %}
+                            <div id="div_id_actions" class="form-group">
+                                <input type="hidden" name="action" value="status_change">
+                                <input type="hidden" name="event" value="{{ e.id }}">
+                                <div class="controls ">
+                                    <select class="select form-control select-action" id="{{ e.id }}_actions" name="status">
+                                        {% for status in data.statuses %}
+                                            {% if status == e.status %}
+                                                <option value="{{ status.id }}" selected='selected'>{{ status.name }}</option>
+                                            {% else %}
+                                                <option value="{{ status.id }}">{{ status.name }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                    <input type="checkbox" name="your-group" value="unit-in-group" />
+                                </div>
+                            </div>
+                          </form>
+                          
+                      
                       </td>
-                      <td class='clickable-row' data-href="{% url 'event' e.id %}" style='white-space: nowrap;' bgcolor={% if e.status.start_event %}"#ffff66" {% elif e.status.pause_event %}"#ff6666"{% else %}"#33ff77"{% endif %}>{{ e.status }}</td>
                       <!-- <td>{{ e.team }}</td> -->
                       <!-- <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.duration }}</td> -->
                       <!-- <td class='clickable-row' data-href="{% url 'event' e.id %}" style='white-space: nowrap'>{{ e.date_due|date:'m/d/Y' }}</td> -->
