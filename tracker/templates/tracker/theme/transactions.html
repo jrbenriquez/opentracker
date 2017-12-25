@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load humanize %}
+
+{% block title %}Transactions{% endblock %}
+
+{% block css_plugins %}
+<link href="{% static 'assets/global/plugins/bootstrap-table/bootstrap-table.min.css' %}" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block page_head %}
+<!-- BEGIN PAGE TITLE -->
+<div class="page-title">
+    <h1>Transactions
+        <small>View all user contributions</small>
+    </h1>
+</div>
+<!-- END PAGE TITLE -->
+{% endblock %}
+
+{% block page_content %}
+<!-- PAGE CONTENT INNER -->
+<div class="page-content-inner">
+	<div class="row">
+		<div class="col-md-12">
+            <div class="portlet light">
+                <div class="portlet-title">
+                    <div class="caption caption-md">
+                        <i class="icon-bar-chart font-dark hide"></i>
+                        <span class="caption-subject font-blue-madison bold uppercase">List of Contributions</span>
+                    </div>
+                    <!-- <div class="inputs">
+                        <div class="portlet-input input-inline input-small ">
+                            <div class="input-icon right">
+                                <i class="icon-magnifier"></i>
+                                <input type="text" class="form-control form-control-solid input-circle" placeholder="search..."> </div>
+                        </div>
+                    </div> -->
+                </div>
+                <div class="portlet-body">
+                    {% if not contributions %}
+                        No contributions yet.
+                    {% else %}
+                    <table data-toggle="table">
+                        <thead>
+                            <tr>
+                                <th>Contributor</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        	{% for c in contributions %}
+                        	<tr>
+                        		<td>{{ c.contributor.full_name }}</td>
+                        		<td>PhP {{ c.amount|intcomma }}</td>
+                        		<td>{{ c.created_at|date }}</td>
+                        	</tr>
+                        	{% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+                </div>
+            </div>
+	    </div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+            <div class="portlet light">
+                <div class="portlet-title">
+                    <div class="caption caption-md">
+                        <i class="icon-bar-chart font-dark hide"></i>
+                        <span class="caption-subject font-blue-madison bold uppercase">Loan Payments</span>
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    {% if not loan_payments %}
+                        No loan payments yet.
+                    {% else %}
+                    <table data-toggle="table">
+                        <thead>
+                            <tr>
+                                <th>Borrower</th>
+                                <th>Amount</th>
+                                <th>Payment Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        	{% for c in loan_payments %}
+                        	<tr>
+                        		<td>{{ c.borrower.full_name }}</td>
+                        		<td>PhP {{ c.amount|intcomma }}</td>
+                        		<td>{{ c.created_at|date }}</td>
+                        	</tr>
+                        	{% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+                </div>
+            </div>
+	    </div>
+	</div>
+</div>
+<!-- END PAGE CONTENT INNER -->
+{% endblock %}
+
+{% block post_scripts %}
+<script src="{% static 'assets/global/plugins/bootstrap-table/bootstrap-table.min.js' %}" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$(".transactions").addClass('active');
+});
+</script>
+{% endblock %}

@@ -1,0 +1,237 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en">
+    <!--<![endif]-->
+    <!-- BEGIN HEAD -->
+
+    <head>
+        <meta charset="utf-8" />
+        <title>OpsTracker | {% block title %}{% endblock %}</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        <meta content="Preview page of Metronic Admin Theme #3 for dashboard & statistics" name="description" />
+        <meta content="" name="author" />
+        <!-- BEGIN GLOBAL MANDATORY STYLES -->
+        <link href="http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700&subset=all" rel="stylesheet" type="text/css" />
+        <link href="{% static 'assets/global/plugins/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css" />
+        <link href="{% static 'assets/global/plugins/simple-line-icons/css/simple-line-icons.css' %}" rel="stylesheet" type="text/css" />
+        <link href="{% static 'assets/global/plugins/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" type="text/css" />
+        <!-- END GLOBAL MANDATORY STYLES -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        {% block css_plugins %}
+        {% endblock %}
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL STYLES -->
+        <link href="{% static 'assets/global/css/components.min.css' %}" rel="stylesheet" id="style_components" type="text/css" />
+        <link href="{% static 'assets/global/css/plugins.min.css' %}" rel="stylesheet" type="text/css" />
+        <!-- END THEME GLOBAL STYLES -->
+        <!-- BEGIN THEME LAYOUT STYLES -->
+        <link href="{% static 'assets/layouts/layout3/css/layout.css' %}" rel="stylesheet" type="text/css" />
+        <link href="{% static 'assets/layouts/layout3/css/themes/default.css' %}" rel="stylesheet" type="text/css" id="style_color" />
+        <link href="{% static 'assets/layouts/layout3/css/custom.css' %}" rel="stylesheet" type="text/css" />
+        <!-- END THEME LAYOUT STYLES -->
+        <link rel="shortcut icon" href="{% static 'assets/images/ico.png' %}" />
+
+        <style>
+        .page-header .page-header-top .page-logo .logo-default {
+            margin: 22.5px 0 0;
+            height: 30px;
+        }
+        .page-header .page-header-top .top-menu .navbar-nav>li.quick-sidebar-toggler {
+            padding: 0;
+        }
+        a[disabled] {
+          pointer-events: none;
+          opacity: 0.4;
+        }
+        </style>
+        {% block css %}
+        {% endblock %}
+
+    </head>
+    <!-- END HEAD -->
+
+    <body class="page-container-bg-solid">
+        <div class="page-wrapper">
+            <div class="page-wrapper-row">
+                <div class="page-wrapper-top">
+                    <!-- BEGIN HEADER -->
+                    <div class="page-header">
+                        <!-- BEGIN HEADER TOP -->
+                        <div class="page-header-top">
+                            <div class="container">
+                                <!-- BEGIN LOGO -->
+                                <div class="page-logo">
+                                    <a href="/">
+                                        <img src="{% static 'assets/logo.png' %}" alt="logo" class="logo-default" />
+                                    </a>
+                                </div>
+                                <!-- END LOGO -->
+                                <!-- BEGIN RESPONSIVE MENU TOGGLER -->
+                                <a href="javascript:;" class="menu-toggler"></a>
+                                <!-- END RESPONSIVE MENU TOGGLER -->
+                                <!-- BEGIN TOP NAVIGATION MENU -->
+                                <div class="top-menu">
+                                    <ul class="nav navbar-nav pull-right">
+                                        <!-- <li class="droddown dropdown-separator">
+                                            <span class="separator"></span>
+                                        </li> -->
+                                        <!-- BEGIN USER LOGIN DROPDOWN -->
+                                        <li class="dropdown dropdown-user">
+                                            <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
+                                                <!-- {% if user.image_url %}
+                                                <div class="user user-pic-toolbar" style="background-image:url({{ user.image_url }})"></div>
+                                                {% else %}
+                                                <div class="user user-pic-toolbar" style="background-image:url('/static/assets/pages/img/dashboard/avatar_default_small.jpg')"></div>
+                                                {% endif %} -->
+                                                <span class="username username-hide-on-mobile"> {{ user.first_name }} </span>
+                                                <i class="fa fa-angle-down"></i>
+                                            </a>
+                                            <ul class="dropdown-menu dropdown-menu-default">
+                                                <li>
+                                                    <a href="{% url 'user' 2 %}">
+                                                        <i class="icon-user"></i> My Profile
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="{% url 'logout' %}">
+                                                        <i class="icon-key"></i> Log Out </a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <!-- END USER LOGIN DROPDOWN -->
+                                        <!-- BEGIN QUICK SIDEBAR TOGGLER -->
+                                        <li class="dropdown dropdown-extended quick-sidebar-toggler">
+                                            <span class="sr-only">Toggle Quick Sidebar</span>
+                                            <a href="{% url 'logout' %}" class="dropdown-toggle">
+                                                <i class="icon-logout"></i>
+                                            </a>
+                                        </li>
+                                        <!-- END QUICK SIDEBAR TOGGLER -->
+                                    </ul>
+                                </div>
+                                <!-- END TOP NAVIGATION MENU -->
+                            </div>
+                        </div>
+                        <!-- END HEADER TOP -->
+                        <!-- BEGIN HEADER MENU -->
+                        <div class="page-header-menu">
+                            <div class="container">
+                                <!-- BEGIN MEGA MENU -->
+                                <!-- DOC: Apply "hor-menu-light" class after the "hor-menu" class below to have a horizontal menu with white background -->
+                                <!-- DOC: Remove data-hover="dropdown" and data-close-others="true" attributes below to disable the dropdown opening on mouse hover -->
+                                <div class="hor-menu">
+                                    <ul class="nav navbar-nav">
+                                        <li class="home">
+                                            <a href="{% url 'home' %}"> Home
+                                            </a>
+                                        </li>
+                                        <li class="track">
+                                            <a href="{% url 'track' %}"> Track
+                                            </a>
+                                        </li>
+                                        <li class="loans">
+                                            <a href="{% url 'home' %}"> Reports
+                                            </a>
+                                        </li>
+                                        <li class="profile">
+                                            <a href="{% url 'user' 2 %}"> Profile
+                                            </a>
+                                        </li>
+                                        {% if user.individual.company_managed %}
+                                        <li class="company">
+                                            <a href="{% url 'company:page' company_id=user.individual.company_managed.uuid %}"> Company
+                                            </a>
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                                <!-- END MEGA MENU -->
+                            </div>
+                        </div>
+                        <!-- END HEADER MENU -->
+                    </div>
+                    <!-- END HEADER -->
+                </div>
+            </div>
+            <div class="page-wrapper-row full-height">
+                <div class="page-wrapper-middle">
+                    <!-- BEGIN CONTAINER -->
+                    <div class="page-container">
+                        <!-- BEGIN CONTENT -->
+                        <div class="page-content-wrapper">
+                            <!-- BEGIN CONTENT BODY -->
+                            <!-- BEGIN PAGE HEAD-->
+                            <div class="page-head">
+                                <div class="container">
+                                    <!-- BEGIN PAGE TITLE -->
+                                    {% block page_head %}
+                                    {% endblock %}
+                                    <!-- END PAGE TITLE -->
+                                </div>
+                            </div>
+                            <!-- END PAGE HEAD-->
+                            <!-- BEGIN PAGE CONTENT BODY -->
+                            <div class="page-content">
+                                <div class="container">
+                                    {% block page_content %}
+                                    {% endblock%}
+                                </div>
+                            </div>
+                            <!-- END PAGE CONTENT BODY -->
+                            <!-- END CONTENT BODY -->
+                        </div>
+                        <!-- END CONTENT -->
+                    </div>
+                    <!-- END CONTAINER -->
+                </div>
+            </div>
+            <div class="page-wrapper-row">
+                <div class="page-wrapper-bottom">
+                    <!-- BEGIN FOOTER -->
+                    <div class="scroll-to-top">
+                        <i class="icon-arrow-up"></i>
+                    </div>
+                    <!-- END FOOTER -->
+                </div>
+            </div>
+        </div>
+
+        <!-- END REPORT ISSUE MODAL -->
+        <!--[if lt IE 9]>
+        <script src="../assets/global/plugins/respond.min.js"></script>
+        <script src="../assets/global/plugins/excanvas.min.js"></script>
+        <script src="../assets/global/plugins/ie8.fix.min.js"></script>
+        <![endif]-->
+        <!-- BEGIN CORE PLUGINS -->
+        <script src="{% static 'assets/global/plugins/jquery.min.js' %}" type="text/javascript"></script>
+        <script src="{% static 'assets/global/plugins/bootstrap/js/bootstrap.min.js' %}" type="text/javascript"></script>
+        <script src="{% static 'assets/global/plugins/js.cookie.min.js' %}" type="text/javascript"></script>
+        <script src="{% static 'assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js' %}" type="text/javascript"></script>
+        <script src="{% static 'assets/global/plugins/jquery.blockui.min.js' %}" type="text/javascript"></script>
+        <!-- END CORE PLUGINS -->
+        <!-- BEGIN PAGE LEVEL PLUGINS -->
+        {% block script_plugins %}
+        {% endblock %}
+        <script src="{% static 'assets/global/plugins/jquery-validation/js/jquery.validate.min.js' %}" type="text/javascript"></script>
+        <script src="{% static 'assets/global/plugins/jquery-validation/js/additional-methods.min.js' %}" type="text/javascript"></script>
+        <script src="{% static 'assets/global/plugins/moment.min.js' %}" type="text/javascript"></script>
+        <!-- END PAGE LEVEL PLUGINS -->
+        <!-- BEGIN THEME GLOBAL SCRIPTS -->
+        <script src="{% static 'assets/global/scripts/app.js' %}" type="text/javascript"></script>
+        <!-- END THEME GLOBAL SCRIPTS -->
+        <!-- BEGIN PAGE LEVEL SCRIPTS -->
+        {% block post_scripts %}
+        {% endblock %}
+        <!-- END PAGE LEVEL SCRIPTS -->
+        <!-- BEGIN THEME LAYOUT SCRIPTS -->
+        <script src="{% static 'assets/layouts/layout/scripts/layout.min.js' %}" type="text/javascript"></script>
+        <script src="{% static 'assets/layouts/layout/scripts/demo.js' %}" type="text/javascript"></script>
+        <script src="{% static 'assets/layouts/global/scripts/quick-sidebar.js' %}" type="text/javascript"></script>
+        <script src="{% static 'assets/layouts/global/scripts/quick-nav.js' %}" type="text/javascript"></script>
+        <!-- END THEME LAYOUT SCRIPTS -->
+    </body>
+</html>

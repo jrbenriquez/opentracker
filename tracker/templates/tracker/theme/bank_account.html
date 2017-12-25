@@ -1,0 +1,69 @@
+{% extends 'base_profile.html' %}
+{% load staticfiles %}
+{% load humanize %}
+
+{% block title %}Bank Account{% endblock %}
+
+{% block css_plugins %}
+<link href="{% static 'assets/pages/css/profile.css' %}" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block breadcrumb %}
+<ul class="page-breadcrumb breadcrumb">
+    <li>
+        <a href="{% url 'account:home' %}">Home</a>
+        <i class="fa fa-circle"></i>
+    </li>
+    <li>
+        <a href="{% url 'user:personal' %}">Account</a>
+        <i class="fa fa-circle"></i>
+    </li>
+    <li>
+        <span>Bank Account</span>
+    </li>
+</ul>
+{% endblock %}
+
+{% block portlet %}
+<div class="portlet light">
+    <div class="portlet-title">
+        <div class="caption">
+            <span class="caption-subject font-blue-madison bold uppercase">Bank Account</span>
+        </div>
+    </div>
+    <div class="portlet-body form">
+        <form role="form" class="form-horizontal" method="post">
+            {% csrf_token %}
+            <div class="form-body">
+                <div class="form-group">
+                    <label class="control-label col-md-3">Account Name</label>
+                    <div class="col-md-7">
+                        <input type="text" name="account_name", class="form-control" value="{{ fa.account_name }}"> </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Account Number</label>
+                    <div class="col-md-7">
+                        <input type="text" name="account_number", class="form-control" value="{{ fa.account_number }}"> </div>
+                </div>
+            </div>
+            <div class="form-actions">
+                    <div class="row">
+                    <div class="col-md-offset-3 col-md-9">
+                        <button type="submit" class="btn green">Update</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <!-- END PORTLET -->
+</div>
+{% endblock %}
+
+{% block post_scripts %}
+<script type="text/javascript">
+$(document).ready(function() {
+    $(".account").addClass('active');
+    $(".account-bank").addClass('active');
+});
+</script>
+{% endblock %}

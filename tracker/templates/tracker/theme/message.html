@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}Home{% endblock %}
+
+{% block page_content %}
+    <h2>Notice:</h2>
+
+    <ul>
+        {% for msg in messages %}
+        <li>{{ msg }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
+
+
+{% block post_scripts %}
+<script type="text/javascript">
+$(document).ready(function() {
+    $(".home").addClass('active');
+});
+</script>
+{% endblock %}

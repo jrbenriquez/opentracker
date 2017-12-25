@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load humanize %}
+
+{% block title %}Home{% endblock %}
+
+{% block page_content %}
+    <h2>Welcome to PayHiram!</h2>
+
+    {% if company_managed %}
+    <p>You are currently managing <a href="{{ company_managed.get_absolute_url}} ">{{ company_managed.name }}</a></p>
+    <p>Company available funds: <strong>PhP {{ company_managed.wallet.balance|stringformat:".2f"|intcomma }}</strong></p>
+        {% if not company_managed.can_give_loans %}
+            <p>Your company has not yet eligible to give out loans. <br/>Please complete the following requirements to allow your employees to borrow:
+            <ul>
+                {% if not company_managed.financial_account.exists %}
+                <li><a href="{{ company_managed.get_absolute_url }}add-account/">Update Company Bank Details</a></li>
+                {% elif company_managed.wallet.balance < 5000 %}
+                {% endif %}
+            </ul>
+        {% else %}
+            <p>Your company is eligible to give out loans.</p>
+            <li><a href="{{ company_managed.get_absolute_url}}collect/">Collect funds from employees</a></li>
+        {% endif %}
+
+
+    {% elif company %}
+    <p>You are currently under <a href="{{ company.get_absolute_url}} ">{{ company.name }}</a></p>
+
+    <p>Total invested balance: <strong>PhP {{ individual.total_investment|stringformat:".2f"|intcomma  }}</strong></p>
+    <p>Total interest earned: <strong>PhP {{ individual.total_interest|stringformat:".2f"|intcomma  }}</strong></p>
+        {% if not company.can_give_loans %}
+        <p>Your company has not yet eligible to give out loans. Please contact your manager or HR.</p>
+
+        {% elif individual.get_active_loan %}
+        <p><a href="{{ individual.get_active_loan.get_absolute_url }}">You have a pending or active loan.</a>
+        {% elif individual.is_eligible_loan %}
+        <p>You are eligible to loan from your company: <a href="{{ company.get_request_loan_url}}">Click here to apply for a loan</a></p>
+        {% else%}
+        <p>Please complete the following requirements to be eligible to loan:<br/>
+            <ul>
+                {% if not individual.profile.exists %}
+                <li><a href="/profile/">Update your Profile details</a></li>
+                {% endif %}
+                {% if not individual.financial_account.exists %}
+                <li><a href="/profile/account/">Update your Bank Details</a></li>
+                {% endif %}
+            </ul>
+        </p>
+        {% endif %}
+    {% else %}
+    <p>You are currently not under any company. Please contact your manager or HR to enroll you to your company's account.</p>
+    {% endif %}
+{% endblock %}
+
+
+{% block post_scripts %}
+<script type="text/javascript">
+$(document).ready(function() {
+	$(".home").addClass('active');
+});
+</script>
+{% endblock %}

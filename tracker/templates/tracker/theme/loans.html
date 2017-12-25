@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load humanize %}
+
+{% block title %}Loans{% endblock %}
+
+{% block css_plugins %}
+<link href="{% static 'assets/global/plugins/bootstrap-table/bootstrap-table.min.css' %}" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block page_head %}
+<!-- BEGIN PAGE TITLE -->
+<div class="page-title">
+    <h1>Loans
+        <small>View all loans</small>
+    </h1>
+</div>
+<!-- END PAGE TITLE -->
+{% endblock %}
+
+{% block page_content %}
+<!-- PAGE CONTENT INNER -->
+<div class="page-content-inner">
+	<div class="row">
+		<div class="col-md-12">
+            <div class="portlet light">
+                <div class="portlet-title">
+                    <div class="caption caption-md">
+                        <i class="icon-bar-chart font-dark hide"></i>
+                        <span class="caption-subject font-blue-madison bold uppercase">List of Loans</span>
+                    </div>
+                    <!-- <div class="inputs">
+                        <div class="portlet-input input-inline input-small ">
+                            <div class="input-icon right">
+                                <i class="icon-magnifier"></i>
+                                <input type="text" class="form-control form-control-solid input-circle" placeholder="search..."> </div>
+                        </div>
+                    </div> -->
+                </div>
+                <div class="portlet-body">
+                    {% if not loans %}
+                        No loans yet.
+                    {% else %}
+                    <table data-toggle="table">
+                        <thead>
+                            <tr>
+                                <th>Borrower</th>
+                                <th>Amount</th>
+                                <th>Installments</th>
+                                <th>Amortization</th>
+                                <th>Outstanding</th>
+                                <th>Interest Earned</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        	{% for loan in loans %}
+                        	<tr>
+                        		<td>{{ loan.borrower.full_name }}</td>
+                        		<td>PhP {{ loan.amount|intcomma }}</td>
+                        		<td>{{ loan.installments }}</td>
+                        		<td>PhP {{ loan.amortization|intcomma }}</td>
+                        		<td>PhP {{ loan.outstanding|intcomma }}</td>
+                        		<td>PhP {{ loan.total_interest|intcomma }}</td>
+                        		<td>
+                        			{% if loan.status == 'new' %}
+                        			<span class="label label-info">{{ loan.get_status_display }}</span>
+                        			{% elif loan.status == 'frv' %}
+                        			<span class="label label-warning">{{ loan.get_status_display }}</span>
+                        			{% elif loan.status == 'apr' %}
+                        			<span class="label label-primary">{{ loan.get_status_display }}</span>
+                        			{% elif loan.status == 'atv' %}
+                        			<span class="label label-primary">{{ loan.get_status_display }}</span>
+                        			{% elif loan.status == 'cmp' %}
+                        			<span class="label label-success">{{ loan.get_status_display }}</span>
+                        			{% endif %}
+                        		</td>
+                        	</tr>
+                        	{% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+                </div>
+            </div>
+	    </div>
+	</div>
+</div>
+<!-- END PAGE CONTENT INNER -->
+{% endblock %}
+
+
+{% block post_scripts %}
+<script src="{% static 'assets/global/plugins/bootstrap-table/bootstrap-table.min.js' %}" type="text/javascript"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$(".loans").addClass('active');
+});
+</script>
+{% endblock %}

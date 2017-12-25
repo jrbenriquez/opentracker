@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load humanize %}
+
+{% block title %}Profile{% endblock %}
+
+{% block css_plugins %}
+<link href="{% static 'assets/pages/css/profile.css' %}" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block breadcrumb %}
+<ul class="page-breadcrumb breadcrumb">
+    <li>
+        <a href="{% url 'account:home' %}">Home</a>
+        <i class="fa fa-circle"></i>
+    </li>
+    <li>
+        <a href="{% url 'user:personal' %}">Account</a>
+        <i class="fa fa-circle"></i>
+    </li>
+    <li>
+        <span>Loan Status</span>
+    </li>
+</ul>
+{% endblock %}
+
+{% block page_content %}
+<div class="portlet light">
+    <div class="portlet-title">
+        <div class="caption">
+            <span class="caption-subject font-blue-madison bold uppercase">Loan status</span>
+        </div>
+        <div class="actions">
+            <a href="#" class="btn green" id="pay-loan"><i class="fa fa-plus"></i> Pay Loan</a>
+        </div>
+    </div>
+    <div class="container">
+    <div class="col-md-4">
+    <table style="text-align: left">
+        <tr>
+            <td style="width: 210px">Loan Status</td>
+            <td>{{ loan.get_status_display }}</td>
+        </tr>
+        <tr>
+            <td>Loan Amount</td>
+            <td>PhP {{ loan.amount }}</td>
+        </tr>
+        <tr>
+            <td>Outstanding Balance</td>
+            <td>PhP {{ loan.outstanding }}</td>
+        </tr>
+        <tr>
+            <td>Monthly Amortization</td>
+            <td>PhP {{ loan.amortization }}</td>
+        </tr>
+        <tr>
+            <td>Installments</td>
+            <td>{{ loan.installments }}</td>
+        </tr>
+        <tr>
+            <td>Total Interest</td>
+            <td>PhP {{ loan.total_interest }}</td>
+        </tr>
+        <tr>
+            <td>Interest Rate</td>
+            <td>{{ loan.interest_rate }} %</td>
+        </tr>
+        <tr>
+            <td>Next Due</td>
+            <td>{{ loan.next_due }}</td>
+        </tr>
+    </table>
+    </div>
+
+    <div class="col-md-4 col-md-offset-2">
+        <form role="form" class="form-horizontal" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="loan_id" value="{{ loan.uuid }}">
+            <div class="form-body">
+                <div class="form-group">
+                    <label class="control-label col-md-6">Payment Amount</label>
+                    <div class="col-md-6">
+                        <input type="number" name="amount", class="form-control" value="{{ loan.amortization }}"> </div>
+                </div>
+            </div>
+            <!-- END BEGIN PROFILE SIDEBAR -->
+        </form>
+    </div>
+    </div>
+    <!-- END PORTLET -->
+</div>
+{% endblock %}
+
+{% block post_scripts %}
+<script type="text/javascript">
+$(document).ready(function() {
+    $('#pay-loan').click(function(){
+        if (confirm("This will attempt to deduct from your account and pay your loan")) {
+            $("form").submit();
+        }
+    })
+});
+</script>
+{% endblock %}

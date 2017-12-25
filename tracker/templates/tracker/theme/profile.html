@@ -1,0 +1,100 @@
+{% extends 'base_profile.html' %}
+{% load staticfiles %}
+{% load humanize %}
+
+{% block title %}Profile{% endblock %}
+
+{% block css_plugins %}
+<link href="{% static 'assets/pages/css/profile.css' %}" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block breadcrumb %}
+<ul class="page-breadcrumb breadcrumb">
+    <li>
+        <a href="{% url 'account:home' %}">Home</a>
+        <i class="fa fa-circle"></i>
+    </li>
+    <li>
+        <a href="{% url 'user:personal' %}">Account</a>
+        <i class="fa fa-circle"></i>
+    </li>
+    <li>
+        <span>Profile</span>
+    </li>
+</ul>
+{% endblock %}
+
+{% block portlet %}
+<div class="portlet light">
+    <div class="portlet-title">
+        <div class="caption">
+            <span class="caption-subject font-blue-madison bold uppercase">User Profile</span>
+        </div>
+    </div>
+    <div class="portlet-body form">
+    	<form role="form" class="form-horizontal" method="post">
+    		{% csrf_token %}
+    		<div class="form-body">
+    			<div class="form-group">
+                    <label class="control-label col-md-3">Monthly Salary</label>
+                    <div class="col-md-7">
+                        <input type="number" name="monthly_salary", class="form-control" value="{{ profile.monthly_salary }}"> </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Tenure in Company</label>
+                    <div class="col-md-7">
+                        <input type="number" name="tenure_in_company", class="form-control" value="{{ profile.tenure_in_company }}"> </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Position</label>
+                    <div class="col-md-7">
+                    	<select class="form-control" name="position" id="position">
+                    		<option value="">Select position</option>
+                    		<option value="man">Managerial</option>
+                    		<option value="sup">Supervisorial</option>
+                    		<option value="stf">Staff</option>
+                    		<option value="con">Contractual</option>
+                    	</select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">Civil Status</label>
+                    <div class="col-md-7">
+                    	<select class="form-control" name="civil_status" id="civil_status">
+                    		<option value="">Select status</option>
+                    		<option value="s">Single</option>
+                    		<option value="m">Married</option>
+                    		<option value="d">Divorced/Annulled</option>
+                    		<option value="w">Widowed</option>
+                    	</select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3">No. of Children</label>
+                    <div class="col-md-7">
+                        <input type="number" name="children", class="form-control"  value="{{ profile.children }}"> </div>
+                </div>
+            </div>
+            <div class="form-actions">
+                <div class="row">
+                <div class="col-md-offset-3 col-md-9">
+                    <button type="submit" class="btn green">Update</button>
+                </div>
+            </div>
+        <!-- END BEGIN PROFILE SIDEBAR -->
+        </form>
+    </div>
+    <!-- END PORTLET -->
+</div>
+{% endblock %}
+
+{% block post_scripts %}
+<script type="text/javascript">
+$(document).ready(function() {
+	$(".account").addClass('active');
+    $(".account-profile").addClass('active');
+	$("#position").val("{{ profile.position }}");
+	$("#civil_status").val("{{ profile.civil_status }}");
+});
+</script>
+{% endblock %}

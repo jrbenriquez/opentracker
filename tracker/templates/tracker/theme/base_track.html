@@ -1,0 +1,298 @@
+{% extends 'tracker/theme/base.html' %}
+{% load staticfiles %}
+{% load humanize %}
+{% load crispy_forms_tags %}
+
+{% block css_plugins %}
+<link href="{% static 'assets/pages/css/profile.css' %}" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block css %}
+<style>
+.profile-desc-link span {
+  line-height: 1.6;
+}
+.profile-desc-link span:nth-child(2) {
+  float: right;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 70%;
+}
+.profile-desc-link div {
+    float: right;
+}
+.circle-small {
+  border-radius: 25px!important;
+  border: 1px solid #FFF;
+  box-shadow: 0 0 2px #888;
+  height: 20px;
+  width: 20px;
+}
+.circle {
+  border: 1px solid #FFF;
+  box-shadow: 0 0 2px #888;
+  height: 34px;
+  width: 34px;
+  font: 10px italic;
+}
+.c-section {
+	margin-bottom: 15px;
+}
+.c-section > h3 {
+    font-size: 26px;
+    margin: 0 0 30px;
+    text-transform: uppercase;
+}
+.c-section > .c-content-label {
+    display: inline;
+    padding: 3px 7px;
+    color: #fff;
+}
+.c-section > p {
+	margin-top: 20px !important;
+	font-size: 16px;
+    line-height: 24px;
+    color: #7f8c97;
+    font-weight: 300;
+    padding-right: 50px;
+}
+select option[disabled] {
+    display: none;
+}
+</style>
+{% endblock %}
+
+{% block page_head %}
+<!-- BEGIN PAGE TITLE -->
+<div class="page-title">
+    <h1>Account
+        <small>Track Events</small>
+    </h1>
+</div>
+<!-- END PAGE TITLE -->
+{% endblock %}
+
+{% block page_content %}
+{% block breadcrumb %}
+{% endblock %}
+<div class="page-content-inner">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- BEGIN PROFILE SIDEBAR -->
+            <div class="profile-sidebar">
+                <!-- PORTLET MAIN -->
+                <!-- PORTLET MAIN -->
+                <div class="portlet light ">
+                    <!-- SIDEBAR USER TITLE -->
+                    <div class="profile-usertitle">
+                        <div class="profile-usertitle-job"> New Event </div>
+                    </div>
+                    <!-- END SIDEBAR USER TITLE -->
+                    <div class="profile-usermenu">
+                        <form action="{% url 'new_submit' 'team' %}" method="post">
+                            {% csrf_token %}
+                            <div id="div_id_team" class="form-group"> 
+                            <label for="id_team" class="control-label  requiredField">
+                                        Team<span class="asteriskField">*</span> 
+                            </label> 
+                                <div class="controls ">
+                                    <select class="select form-control" id="id_team" name="team">
+                                    {% for team in data.teams %}
+                                        {% if user.team == team %}
+                                            <option value="{{ team.id }}" selected='selected'>{{ team.name }}</option>
+                                        {% else %}
+                                        <option value="{{ team.id }}">{{ team.name }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row"> 
+                                <div class="col-sm-10">
+                                    <div id="div_id_task_type" class="form-group">
+                                        <label for="id_task_type" class="control-label  requiredField">
+                                                Task type<span class="asteriskField">*</span>
+                                            </label>
+                                        <div class="controls ">
+                                            <select class="select form-control" id="id_task_type" name="task_type">
+                                                {% for team in data.teams %}
+                                                    <span id="{{ team.id }}_types">
+                                                    {% for type in data.types %}
+                                                        {% if type.parent_team == team %}
+                                                            {% if user.team == team  %}
+                                                                <option value="{{ type.id }}" class="option_type {{ team.id }}_type">{{ type.name }}</option>
+                                                            {% else %}
+                                                                <option value="{{ type.id }}" class="option_type {{ team.id }}_type" disabled>{{ type.name }}</option>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    </span>
+                                                
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            
+                            <div class="row">
+                                <div class="col-sm-10">
+                                    <div id="div_id_agent" class="form-group"> 
+                                        <label for="id_agent" class="control-label  requiredField">
+                                            Agent<span class="asteriskField">*</span> 
+                                        </label> 
+                                        <div class="controls ">
+                                            <select class="select form-control" id="id_agent" name="agent">
+                                                <option value="" class='empty_option_user'>---------</option>
+                                                    {% for team in data.teams %}
+                                                        <span id="{{ team.id }}_users">
+                                                        {% for agent in data.users %}
+                                                            {% if agent.team == team %}
+                                                                {% if agent.username == user.username %}
+                                                                    <option value="{{ agent.id }}" class="default_user option_user {{ team.id }}_user" selected='selected'>{{ agent.username }}</option>
+                                                                {% else %}
+                                                                    <option value="{{ agent.id }}" class="option_user {{ team.id }}_user" disabled>{{ agent.username }}</option>
+                                                                {% endif %}
+                                                                
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                        </span>
+                                                    {% endfor %}
+                                            </select> 
+                                        </div> 
+                                    </div> 
+                                </div>
+                            </div>
+                            
+                            <div class="row"> 
+                                <div class="col-sm-10"> 
+                                    <div id="div_id_unique_identifier" class="form-group"> 
+                                        <label for="id_unique_identifier" class="control-label  requiredField">
+                                                Ticket Link/ID<span class="asteriskField">*</span> 
+                                        </label>
+                                        <div class="controls "> 
+                                            <input class="textinput textInput form-control" id="id_unique_identifier" maxlength="500" name="unique_identifier" type="text"> 
+                                        </div> 
+                                    </div> 
+                                </div>
+                            </div>
+                            
+                            <div class="row"> 
+                                <div class="col-sm-10"> 
+                                    <div id="div_id_ticket_name" class="form-group"> 
+                                        <label for="id_ticket_name" class="control-label  requiredField">
+                                            Ticket name<span class="asteriskField">*</span> 
+                                        </label> 
+                                        <div class="controls "> 
+                                            <input class="textinput textInput form-control" id="id_ticket_name" maxlength="500" name="ticket_name" type="text"> 
+                                        </div> 
+                                    </div> 
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-sm-10"> 
+                                    <div id="div_id_date_due" class="form-group"> 
+                                    <label for="id_date_due" class="control-label  requiredField">
+                                            Date Due<span class="asteriskField">*</span> 
+                                    </label>
+                                     <div class="controls ">
+                                        <input class="textinput textInput form-control" id="id_date_due" name="date_due" type="date" value="2017-12-21"> 
+                                      </div> 
+                                    </div> 
+                                </div>
+                            </div>
+                            
+                            <div class="row"> 
+                                <div class="col-sm-10"> 
+                                    <div id="div_id_quantity" class="form-group"> 
+                                        <label for="id_quantity" class="control-label  requiredField">
+                                            Quantity<span class="asteriskField">*</span>
+                                        </label> 
+                                        <div class="controls "> 
+                                            <input class="numberinput form-control" id="id_quantity" name="quantity" type="number"> 
+                                        </div> 
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row"> 
+                                <div class="col-sm-10"> 
+                                    <div id="div_id_received_date" class="form-group"> 
+                                        <label for="id_received_date" class="control-label  requiredField">
+                                            Received Date<span class="asteriskField">*</span> 
+                                        </label> 
+                                        <div class="controls "> 
+                                            <input class="textinput textInput form-control" id="id_received_date" name="received_date" type="date" value="2017-12-21"> 
+                                        </div> 
+                                    </div> 
+                                </div>
+                            </div>
+                            
+                            <div class="row"> 
+                                <div class="col-sm-10"> 
+                                    <div id="div_id_received_time" class="form-group"> 
+                                        <label for="id_received_time" class="control-label  requiredField">
+                                            Received Time<span class="asteriskField">*</span> 
+                                        </label> 
+                                        <div class="controls "> 
+                                            <input class="textinput textInput form-control" id="id_received_time" name="received_time" type="time" value="11:11"> 
+                                        </div> 
+                                    </div> 
+                                </div>
+                            </div>
+                            
+                            <input type="submit" name="submit" value="Submit" class="btn btn-primary btn btn-success" id="submit-id-submit">
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            
+            
+            
+            
+            <!-- END BEGIN PROFILE SIDEBAR -->
+            <!-- BEGIN PROFILE CONTENT -->
+            <div class="profile-content">
+                <div class="row">
+                    <div class="col-md-12">
+                        <!-- BEGIN PORTLET -->
+                        {% block portlet %}
+                        {% endblock %}
+                    </div>
+                </div>
+            </div>
+            <!-- END PROFILE CONTENT -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block post_scripts %}
+    <script>
+        var current_date = new Date() 
+        var date_string = current_date.getFullYear() + '-' + ('0' + (current_date.getMonth()+1)).slice(-2) + '-' + ('0' + current_date.getDate()).slice(-2);
+        var time_string = ('0' + (current_date.getHours())).slice(-2) + ':' + ('0' + current_date.getMinutes()).slice(-2);
+        document.getElementById('id_date_due').value = date_string;
+        document.getElementById('id_received_date').value = date_string;
+        document.getElementById('id_received_time').value = time_string;
+        $( "#id_team" ).change(function() {
+            team_id = $( "#id_team option:selected" ).val()
+            $(".option_type").prop('disabled', true);
+            $(".option_user").prop('disabled', true);
+            $(".default_user").removeAttr('selected')
+            $("."+team_id+"_type").removeAttr('selected')
+            $(".empty-option_user").attr('selected', 'selected');
+            $("."+team_id+"_type").prop('disabled', false);
+            $("."+team_id+"_user").prop('disabled', false);
+        });
+    </script>
+    
+    {% block track_scripts %}
+    {% endblock %}
+{% endblock %}
+
