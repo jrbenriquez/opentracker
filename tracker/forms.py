@@ -55,25 +55,39 @@ class EventForm(ModelForm):
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
             Div(
-                Div('team', css_class="col-sm-2"),
-                Div('task_type', css_class="col-sm-2"),
-                Div('agent', css_class="col-sm-2"),
+                Div('team', css_class="col-sm-10"),
                 css_class = 'row'
             ),
             Div(
-                Div('unique_identifier', css_class="col-sm-8"),
+                Div('task_type', css_class="col-sm-10"),
                 css_class = 'row'
             ),
             Div(
-                Div('ticket_name', css_class="col-sm-6"),
-                Div('date_due', css_class="col-sm-4"),
+                Div('agent', css_class="col-sm-10"),
                 css_class = 'row'
             ),
             Div(
-                Div('quantity', css_class="col-sm-2"),
-                Div('received_date', css_class="col-sm-2"),
-                Div('received_time', css_class="col-sm-2"),
-
+                Div('unique_identifier', css_class="col-sm-10"),
+                css_class = 'row'
+            ),
+            Div(
+                Div('ticket_name', css_class="col-sm-10"),
+                css_class = 'row'
+            ),
+            Div(
+                Div('date_due', css_class="col-sm-10"),
+                css_class = 'row'
+            ),
+            Div(
+                Div('quantity', css_class="col-sm-10"),
+                css_class = 'row'
+            ),
+            Div(
+                Div('received_date', css_class="col-sm-10"),
+                css_class = 'row'
+            ),
+            Div(
+                Div('received_time', css_class="col-sm-10"),
                 css_class = 'row'
             ),
             Submit('submit', u'Submit', css_class='btn btn-success'),

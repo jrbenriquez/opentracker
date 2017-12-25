@@ -1,12 +1,17 @@
 import datetime
 import pytz
 
-from django.shortcuts import render
+
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
+from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.core.urlresolvers import reverse_lazy
 from django.http import HttpResponseRedirect
 from django.http import QueryDict
 from django.views.generic.edit import FormView
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.messages.views import SuccessMessageMixin
 from tracker.models import (
     Event, User, Team, Status, Type, SubType, Ticket, LabelValue, LabelTag
@@ -18,6 +23,7 @@ from django.contrib.auth.forms import UserCreationForm
 from datetime import date
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.views.generic.edit import CreateView
+from django.views.decorators.csrf import csrf_exempt
 
 
 def localtime_to_utc(time):
@@ -93,6 +99,7 @@ def create_label(request, event_id):
         value=new_value,
         tag=tag,
         )
+    label.event.add(event)
     return label
     
 
@@ -130,7 +137,62 @@ def pause_event(request):
     event.duration = event.get_duration()
     event.save()
 
+
+def login_view(request):
+    if request.user.is_authenticated():
+        return redirect(reverse('home'))
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = request.POST['username']
+            password = request.POST['password']
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect(reverse('home'))
+            else:
+                print 'Invalid credentials'
+    else:
+        form = AuthenticationForm()
+
+    return render(request, 'tracker/theme/login.html', {'form': form})
+
+@csrf_exempt
+def register(request):
+    if request.method == 'POST':
+        form = TrackerUserCreationForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            team = form.cleaned_data.get('team')
+            email = form.cleaned_data.get('email')
+            first_name = form.cleaned_data.get('first_name')
+            last_name = form.cleaned_data.get('last_name')
+            form.save()
+            user = authenticate(username=username, password=raw_password)
+
+            login(request, user)
+            return redirect('home')
+        else:
+            print form.errors
+    else:
+        form = UserCreationForm()
+    teams = Team.objects.all()
+    return render(request, 'tracker/theme/register.html', {'form': form, 'teams': teams})
+
+@login_required(login_url='/login/')
+def logout_view(request):
+    try:
+        logout(request)
+
+    except Exception as e:
+        print "%s: %s" % (e, request.user)
+
+    return redirect('/login')
+
+
 # Create your views here.
+@login_required(login_url='/login/')
 def home(request):
     #Table Actions using POST
     if request.method == 'POST':
@@ -164,9 +226,54 @@ def home(request):
             'teams': teams,
             'users': users,
             'parent_page': 'home',
-            'idx': None
+            'idx': None,
         }
-    return render(request, 'tracker/home.html', context)
+    return render(request, 'tracker/home2.html', context)
+
+@login_required(login_url='/login/')    
+def track(request):
+    if request.method == 'POST':
+        if request.POST.get('action') == 'start':
+            start_event(request)
+        elif request.POST.get('action') == 'stop':
+            stop_event(request)
+        elif request.POST.get('action') == 'pause':
+            pause_event(request)
+    form = EventForm()
+    events_list = Event.objects.order_by('-timestamp_updated', 'status')
+    page = request.GET.get('page', 1)
+    paginator = Paginator(events_list, 10)
+    try:
+        events = paginator.page(page)
+    except PageNotAnInteger:
+        events = paginator.page(1)
+    except EmptyPage:
+        events = paginator.page(paginator.num_pages)
+    status_start = Status.objects.filter(start_event=True)
+    status_stop = Status.objects.filter(stop_event=True)
+    status_pause = Status.objects.filter(pause_event=True)
+    teams = Team.objects.order_by('id')
+    users = User.objects.order_by('username')
+    types = Type.objects.order_by('id')
+    data = {
+        'teams': teams,
+        'users': users,
+        'types': types,
+        }
+    context = {
+            'form': form,
+            'events': events,
+            'status_start': status_start,
+            'status_stop': status_stop,
+            'status_pause': status_pause,
+            'teams': teams,
+            'users': users,
+            'parent_page': 'home',
+            'idx': None,
+            'data': data,
+        }
+    print data
+    return render(request, 'tracker/theme/track.html', context)
 # Fix users_all - should be consistent with all views
 def team(request, team_id):
     #Table Actions using POST
@@ -213,6 +320,7 @@ def team(request, team_id):
         }
     return render(request, 'tracker/team.html', context)
 
+@login_required(login_url='/login/')
 def user(request, user_id):
      #Table Actions using POST
     if request.method == 'POST':
@@ -259,8 +367,9 @@ def user(request, user_id):
             'id' : user.id,
             'form' : form,
         }
-    return render(request, 'tracker/user.html', context)
+    return render(request, 'tracker/theme/account.html', context)
 
+@login_required(login_url='/login/')  
 def event(request, event_id):
     #Table Actions using POST
     # ToDo: Create own views for table action....
@@ -276,24 +385,36 @@ def event(request, event_id):
             pause_event(request)
         elif request.POST.get('action') == 'add-label':
             create_label(request, event_id)
-    
+    form = EventForm()
     event = Event.objects.get(pk=event_id)
-    status_start = Status.objects.filter(start_event=True)
-    status_pause = Status.objects.filter(pause_event=True)
-    status_stop = Status.objects.filter(stop_event=True)
     labels = {}
-    for label_value in LabelValue.objects.filter(tag__event=event_id):
+    for label_value in LabelValue.objects.filter(event=event_id):
         labels[label_value.tag.name] = label_value.value
+    status_start = Status.objects.filter(start_event=True)
+    status_stop = Status.objects.filter(stop_event=True)
+    status_pause = Status.objects.filter(pause_event=True)
+    teams = Team.objects.order_by('id')
+    users = User.objects.order_by('username')
+    types = Type.objects.order_by('id')
+    data = {
+        'teams': teams,
+        'users': users,
+        'types': types,
+        }
     context = {
-        'event': event,
-        'status_start': status_start,
-        'status_pause': status_pause,
-        'status_stop': status_stop,
-        'parent_page': 'home',
-        'labels': labels,
-    }
-    
-    return render(request, 'tracker/event.html', context)
+            'form': form,
+            'event': event,
+            'status_start': status_start,
+            'status_stop': status_stop,
+            'status_pause': status_pause,
+            'teams': teams,
+            'users': users,
+            'parent_page': 'home',
+            'idx': None,
+            'data': data,
+            'labels': labels,
+        }
+    return render(request, 'tracker/theme/event.html', context)
     
 # DELETE THIS? NO MORE USE
 def new(request):
@@ -343,6 +464,7 @@ def new(request):
         print "RENDERIIINGs"
         return render(request, 'tracker/new_event.html', context)
 
+
 def new_submit(request, parent_page):
     print request.method
     if request.method == 'POST':
@@ -367,12 +489,12 @@ def new_submit(request, parent_page):
                 'parent_page': 'home',
                 'labels': labels,
             }
-            return render(request, 'tracker/event.html', context)
+            return redirect('track')
         else:
             print form.errors
             messages.error(request, "Please correct the errors below and resubmit.")
             if parent_page == 'team':
-                return render(request, 'tracker/team.html', {'form': form})
+                return render(request, 'tracker/theme/track.html', {'form': form})
             elif parent_page == 'user':
                 return render(request, 'tracker/user.html', {'form': form})
 

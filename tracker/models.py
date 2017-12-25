@@ -139,10 +139,17 @@ class Event(models.Model):
 class LabelTag(models.Model):
     name = models.CharField(max_length=128, unique=True)
     event = models.ManyToManyField(Event)
+    
+    def __str__(self):
+        return self.name
 
 class LabelValue(models.Model):
     tag = models.ForeignKey(LabelTag)
+    event = models.ManyToManyField(Event)
     value = models.CharField(max_length=128)
+    
+    def __str__(self):
+        return self.value
 
 class Ticket(models.Model):
     name = models.CharField(max_length=500)
