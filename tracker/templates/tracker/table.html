@@ -18,105 +18,39 @@
                       <th>Ticket&nbspName</th>
                       <th>Quantity</th>
                     </tr>
+                <form id="status_change"action="{% url 'track' %}" method="post" class="form-inline">
+                {% csrf_token %}
                 {% for e in events %}
-                
                 <tr>
-                      <!-- <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.duration|task_duration:'simple' }}</td> -->
-                      <!-- <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.timestamp_start }}</td> -->
-                      <!-- <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.timestamp_updated }}</td> -->
-                      <!-- <td style='white-space: nowrap;' align="center">
-                          <form action="{% url 'new_submit' 'team' %}" method="post">
-                            {% csrf_token %}
-                            <div id="div_id_actions" class="form-group">
-                                <div class="controls ">
-                                    <select class="select form-control" id="{{ e.id }}_actions" name="team">
-                                        <option value="1">In Progress</option>
-                                        <option value="2">Done</option>
-                                    </select>
-                                </div>
-                            </div>
-                          </form>
-                        {% if e.status.start_event %}
-                        
-                        {% for s in status_pause %}
-                         <form id="form_event_pause_{{ e.id }}_{{ s.id }}" action="
-                               {% if parent_page == 'home' %}
-                               {% url parent_page %}
-                               {% else %}
-                               {% url parent_page id %}
-                               {% endif %}" method="post">
-                                 {% csrf_token %}
-                                <input type="hidden" value="{{ e.id }}" name="event" />
-                                <input type="hidden" value="pause" name="action" />
-                                <input type="hidden" value="" name="activity"/>
-                         </form>
-                        
-                        
-                      
-                        <a style="margin-bottom: 8px;" onClick="pauseEvent({{ e.id }}, {{ s.id }})" class="btn btn-danger btn-sm">{{ s.name }}</a>
-                        {% endfor %}
-                        
-                          {% for s in status_stop %}
-                         <form id="form_event_stop_{{ e.id }}_{{ s.id }}" action="
-                               {% if parent_page == 'home' %}
-                               {% url parent_page %}
-                               {% else %}
-                               {% url parent_page id %}
-                               {% endif %}" method="post">
-                                 {% csrf_token %}
-                                <input type="hidden" value="{{ e.id }}" name="event" />
-                                <input type="hidden" value="stop" name="action" />
-                                <input type="hidden" value="" name="activity"/>
-                         </form>
-                        
-                        
-                      
-                        <a style="margin-bottom: 8px;" onClick="stopEvent({{ e.id }}, {{ s.id }})" class="btn btn-default btn-sm">{{ s.name }}</a>
-                        {% endfor %}
-                        
-                        
-                        {% elif e.status.stop_event or e.status.pause_event %}
-                        {% for s in status_start %}
-                        <form id="form_event_start_{{ e.id }}_{{ s.id }}" action="
-                               {% if parent_page == 'home' %}
-                               {% url parent_page %}
-                               {% else %}
-                               {% url parent_page id %}
-                               {% endif %}" method="post">
-                                 {% csrf_token %}
-                                <input type="hidden" value="{{ e.id }}" name="event" />
-                                 <input type="hidden" value="start" name="action" />
-                                 <input type="hidden" value="" name="activity"/>
-                         </form>
-                        
-                        <a style="margin-bottom: 8px;" onClick="startEvent({{ e.id }}, {{ s.id }})" class="btn btn-default btn-sm">{{ s.name }}</a>
-                        {% endfor %}
-                        {% else %}
-                        No Action
-                        {% endif %}
-        
-                      </td> -->
                       <td class='' data-href="{% url 'event' e.id %}" style='white-space: nowrap;' bgcolor={% if e.status.start_event %}"#ffff66" {% elif e.status.pause_event %}"#ff6666"{% else %}"#33ff77"{% endif %}>
-                          <!-- EXPAND FORM OUTSIDE TO ALL TABLE SO PWEDE NA MAG MULTI ACTIONS SA ISANG SUBMIT -->
-                          <form id="{{ e.id }}_form"action="{% url 'track' %}" method="post" class="form-inline">
-                            {% csrf_token %}
-                            <div id="div_id_actions" class="form-group">
-                                <input type="hidden" name="action" value="status_change">
-                                <input type="hidden" name="event" value="{{ e.id }}">
-                                <div class="controls ">
-                                    <select class="select form-control select-action" id="{{ e.id }}_actions" name="status">
-                                        {% for status in data.statuses %}
-                                            {% if status == e.status %}
-                                                <option value="{{ status.id }}" selected='selected'>{{ status.name }}</option>
-                                            {% else %}
+                        <div id="div_id_actions" class="form-group form-inline">
+                            <input type="hidden" name="event" value="{{ e.id }}">
+                            <div class="controls ">
+                                <select class="select form-control select-action" id="{{ e.id }}_actions" name="status">
+                                    {% for status in data.statuses %}
+                                        {% if status == e.status %}
+                                            <option value="{{ status.id }}" selected='selected'>{{ status.name }}</option>
+                                        {% else %}
+                                            {% if e.status.stop_event %}
+                                              {% if not status.pause_event %}
                                                 <option value="{{ status.id }}">{{ status.name }}</option>
+                                              {% endif %}
+                                            
+                                            {% elif e.status.pause_event %}
+                                              {% if not status.stop_event %}
+                                                <option value="{{ status.id }}">{{ status.name }}</option>
+                                              {% endif %}
+                                            
+                                            {% else %}
+                                              <option value="{{ status.id }}">{{ status.name }}</option>
                                             {% endif %}
-                                        {% endfor %}
-                                    </select>
-                                    <input type="checkbox" name="your-group" value="unit-in-group" />
-                                </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                <input type="checkbox" name="your-group" value="unit-in-group" />
                             </div>
-                          </form>
+                        </div>
+                
                           
                       
                       </td>
@@ -131,6 +65,7 @@
                       <td class='clickable-row' data-href="{% url 'event' e.id %}">{{ e.quantity }}</td>
                 </tr>
                 {% endfor %}
+                </form>
             </table>
             </font>
           </div>

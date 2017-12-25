@@ -1,5 +1,6 @@
 import datetime
 import pytz
+import json
 
 
 from django.contrib.auth import authenticate, login, logout
@@ -103,38 +104,28 @@ def create_label(request, event_id):
     return label
     
 
-def start_event(request):
+def start_event(event, new_status):
     # POST request requirements:
     # event -> key of event
     # activity -> key of status
-    print request.POST.get('status')
-    eventid = request.POST.get('event')
-    event = Event.objects.get(pk=eventid)
-    event.status = Status.objects.get(pk=request.POST.get('status'))
+    print new_status.name
+    event.status = new_status
     print event.status
-    print "Activity detected is: " + request.POST.get('status')
+    print "Activity detected is: " + new_status.name
     event.save()
 
-def stop_event(request):
+def stop_event(event, new_status):
     # POST request requirements:
     # event -> key of event
     # activity -> key of status
-    print request.POST.get('status')
-    eventid = request.POST.get('event')
-    event = Event.objects.get(pk=eventid)
-    event.status = Status.objects.get(pk=request.POST.get('status'))
-    event.duration = event.get_duration()
+    event.status = new_status
     event.save()
 
-def pause_event(request):
+def pause_event(event, new_status):
     # POST request requirements:
     # event -> key of event
     # activity -> key of status
-    print request.POST.get('status')
-    eventid = request.POST.get('event')
-    event = Event.objects.get(pk=eventid)
-    event.status = Status.objects.get(pk=request.POST.get('status'))
-    event.duration = event.get_duration()
+    event.status = new_status
     event.save()
 
 
@@ -233,14 +224,25 @@ def home(request):
 @login_required(login_url='/login/')    
 def track(request):
     if request.method == 'POST':
-        if request.POST.get('action') == 'status_change':
-            new_status = Status.objects.get(pk=request.POST.get('status'))
-            if new_status.start_event:
-                start_event(request)
-            elif new_status.stop_event:
-                stop_event(request)
-            elif new_status.pause_event:
-                pause_event(request)
+        status_data = dict(request.POST)
+        event_dict = {}
+        print status_data
+        #Get Events that needs to be changed
+        for i in range(0,len(status_data['event'])):
+            event = Event.objects.filter(pk = status_data['event'][i])[0]
+            if int(event.status.id) != int(status_data['status'][i]):
+                event_dict[event] = int(status_data['status'][i])
+        print event_dict    
+        for event, status in event_dict.items():
+                print status
+                print event
+                new_status = Status.objects.get(pk=status)
+                if new_status.start_event:
+                    start_event(event, new_status)
+                elif new_status.stop_event:
+                    stop_event(event, new_status)
+                elif new_status.pause_event:
+                    pause_event(event, new_status)
     form = EventForm()
     events_list = Event.objects.order_by('-timestamp_updated', 'status')
     page = request.GET.get('page', 1)
@@ -276,7 +278,6 @@ def track(request):
             'idx': None,
             'data': data,
         }
-    print data
     return render(request, 'tracker/theme/track.html', context)
 # Fix users_all - should be consistent with all views
 def team(request, team_id):
