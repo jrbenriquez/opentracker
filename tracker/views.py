@@ -50,9 +50,7 @@ def create_event(form):
         unique_identifier = form.cleaned_data['unique_identifier']
         ticket_name = form.cleaned_data['ticket_name']
         # Combine Received Date and time -> ToDo : Edit form to pass both Datetime (datetime-local)
-        received_date = form.cleaned_data['received_date']
-        received_time = form.cleaned_data['received_time']
-        received = localtime_to_utc(datetime.datetime.combine(received_date, received_time))
+        received = form.cleaned_data['received']
         if Ticket.objects.filter(unique_identifier=unique_identifier).exists():
             ticket_name = Ticket.objects.get(unique_identifier=unique_identifier)
         else:
@@ -226,16 +224,23 @@ def track(request):
     if request.method == 'POST':
         status_data = dict(request.POST)
         event_dict = {}
-        print status_data
+        reference_status = None
+        action_status = None
         #Get Events that needs to be changed
         for i in range(0,len(status_data['event'])):
             event = Event.objects.filter(pk = status_data['event'][i])[0]
             if int(event.status.id) != int(status_data['status'][i]):
+                action_status = int(status_data['status'][i])
+                reference_status = int(event.status.id)
                 event_dict[event] = int(status_data['status'][i])
-        print event_dict    
+        
+        if request.POST.getlist('checks'):
+            for event_id in request.POST.getlist('checks'):
+                event = Event.objects.filter(pk = event_id)[0]
+                if reference_status == int(event.status.id):
+                    event_dict[event] = action_status
+        
         for event, status in event_dict.items():
-                print status
-                print event
                 new_status = Status.objects.get(pk=status)
                 if new_status.start_event:
                     start_event(event, new_status)
@@ -244,7 +249,7 @@ def track(request):
                 elif new_status.pause_event:
                     pause_event(event, new_status)
     form = EventForm()
-    events_list = Event.objects.order_by('-timestamp_updated', 'status')
+    events_list = Event.objects.filter(agent=request.user).order_by('-timestamp_updated', 'status')
     page = request.GET.get('page', 1)
     paginator = Paginator(events_list, 10)
     try:
@@ -327,14 +332,6 @@ def team(request, team_id):
 
 @login_required(login_url='/login/')
 def user(request, user_id):
-     #Table Actions using POST
-    if request.method == 'POST':
-        if request.POST.get('action') == 'start':
-            start_event(request)
-        elif request.POST.get('action') == 'stop':
-            stop_event(request)
-        elif request.POST.get('action') == 'pause':
-            pause_event(request)
     events_list = Event.objects.filter(
         agent=user_id).order_by('-timestamp_updated', 'status')
     page = request.GET.get('page', 1)
@@ -357,7 +354,6 @@ def user(request, user_id):
         'team': user.team.id,
         'agent': user.id
         }
-    form = TeamEventForm(initial=initial_dict)
     context = {
             'events': events,
             'status_start': status_start,
@@ -370,7 +366,6 @@ def user(request, user_id):
             'parent_page': 'user',
             'parent_object': user,
             'id' : user.id,
-            'form' : form,
         }
     return render(request, 'tracker/theme/account.html', context)
 
@@ -476,22 +471,41 @@ def new_submit(request, parent_page):
         parent_id = request.POST.get('team')
         if parent_page == 'team' or parent_page == 'user':
             parent_object = Team.objects.get(pk=parent_id)
-            form = TeamEventForm(request.POST, initial={'team': parent_id})
+            if len(request.POST.getlist('agent')) > 1:
+                #BAD Practice! Modifying the request! :(
+                agents = list(request.POST.getlist('agent'))
+                request.POST = request.POST.copy()
+                for agent in agents:
+                    request.POST['agent']=agent
+                    form = EventForm(request.POST)
+                    
+                    if form.is_valid():
+                        event = create_event(form)            
+                    else:
+                        print form.errors
+                        messages.error(request, "Please correct the errors below and resubmit.")
+                        if parent_page == 'team':
+                            return render(request, 'tracker/theme/track.html', {'form': form})
+                        elif parent_page == 'user':
+                            return render(request, 'tracker/user.html', {'form': form})
+
+                redirect_url = 'event'
+                return redirect(redirect_url, event_id=event.id)
+            
+            else:
+                form = EventForm(request.POST)
         #Error if not user or team
-        if form.is_valid():
-            event = create_event(form)
-            status_start = Status.objects.filter(start_event=True)
-            status_pause = Status.objects.filter(pause_event=True)
-            status_stop = Status.objects.filter(stop_event=True)
-            redirect_url = 'event'
-            return redirect(redirect_url, event_id=event.id)
-        else:
-            print form.errors
-            messages.error(request, "Please correct the errors below and resubmit.")
-            if parent_page == 'team':
-                return render(request, 'tracker/theme/track.html', {'form': form})
-            elif parent_page == 'user':
-                return render(request, 'tracker/user.html', {'form': form})
+                if form.is_valid():
+                    event = create_event(form)            
+                    redirect_url = 'event'
+                    return redirect(redirect_url, event_id=event.id)
+                else:
+                    print form.errors
+                    messages.error(request, "Please correct the errors below and resubmit.")
+                    if parent_page == 'team':
+                        return render(request, 'tracker/theme/track.html', {'form': form})
+                    elif parent_page == 'user':
+                        return render(request, 'tracker/user.html', {'form': form})
 
 class NewUserView(CreateView):
     template_name = 'tracker/user/user_new.html'

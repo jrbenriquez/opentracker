@@ -25,18 +25,13 @@ def get_time():
     return local_tz.normalize(local_dt).strftime("%H:%M")
 
 class EventForm(ModelForm):
-    date_due = forms.DateField(widget=forms.TextInput(
-        attrs={'type' : 'date'}), label='Date Due', initial=datetime.date.today)
-    received_date = forms.DateField(widget=forms.TextInput(
-        attrs={'type' : 'date'}), label='Received Date', initial=datetime.date.today)
-    received_time = forms.TimeField(widget=forms.TextInput(
-        attrs={'type' : 'time'}), label='Received Time', initial=get_time)
-    # lclean method
+    date_due = forms.DateTimeField(required=True, input_formats=['%Y-%m-%dT%H:%M'])
+    received = forms.DateTimeField(required=True, input_formats=['%Y-%m-%dT%H:%M'])
     class Meta:
         model = Event
         fields = ['task_type', 'agent', 'team',
-                    'unique_identifier', 'ticket_name', 'quantity', 'date_due']
-        exclude =('timestamp_end', 'timestamp_pause','duration','status', 'received')
+                    'unique_identifier', 'ticket_name', 'quantity', 'date_due', 'received']
+        exclude =('timestamp_end', 'timestamp_pause','duration','status')
         labels = {
             "unique_identifier": "Ticket Link/ID"
         }

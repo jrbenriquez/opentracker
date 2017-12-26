@@ -6,6 +6,9 @@
 {% block page_content %}
     <h2>Welcome to Ops Tracker!</h2>
 
+    {% if user.is_superuser %}
+    <a href="{% url 'register' %}" class="forgot-password">Create an account.</a>
+    {% endif %}
 {% endblock page_content %}
 
 {% block post_scripts %}

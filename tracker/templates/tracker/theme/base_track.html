@@ -153,14 +153,36 @@ select option[disabled] {
                                                                 {% if agent.username == user.username %}
                                                                     <option value="{{ agent.id }}" class="default_user option_user {{ team.id }}_user" selected='selected'>{{ agent.username }}</option>
                                                                 {% else %}
-                                                                    <option value="{{ agent.id }}" class="option_user {{ team.id }}_user" disabled>{{ agent.username }}</option>
+                                                                    <option value="{{ agent.id }}" class="option_user {{ team.id }}_user">{{ agent.username }}</option>
                                                                 {% endif %}
                                                                 
                                                             {% endif %}
                                                         {% endfor %}
                                                         </span>
                                                     {% endfor %}
-                                            </select> 
+                                            </select>
+                                            <a href="javascript:void(0)" onClick="switchMultipleAgent()" id="show_multiple_agent">Multiple Agent</a>
+                                            
+                                            <div id="multiple_agent">
+                                                    <select name="agent" multiple id="id_multiple_agent" class="hidden" disabled>
+                                                        {% for team in data.teams %}
+                                                            <span id="{{ team.id }}_users">
+                                                            {% for agent in data.users %}
+                                                                {% if agent.team == team %}
+                                                                    {% if agent.username == user.username %}
+                                                                        <option value="{{ agent.id }}" class="default_user option_user {{ team.id }}_user" selected='selected'>{{ agent.username }}</option>
+                                                                    {% else %}
+                                                                        <option value="{{ agent.id }}" class="option_user {{ team.id }}_user">{{ agent.username }}</option>
+                                                                    {% endif %}
+                                                                    
+                                                                    
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                            </span>
+                                                        {% endfor %}
+                                                    </select>
+                                            </div>
+                                            <a href="javascript:void(0)" class="hidden" onClick="switchSingleAgent()" id="show_single_agent">Single Agent</a>
                                         </div> 
                                     </div> 
                                 </div>
@@ -199,7 +221,7 @@ select option[disabled] {
                                             Date Due<span class="asteriskField">*</span> 
                                     </label>
                                      <div class="controls ">
-                                        <input class="textinput textInput form-control" id="id_date_due" name="date_due" type="date" value="2017-12-21"> 
+                                        <input class="textinput textInput form-control" id="id_date_due" name="date_due" type="datetime-local" value=""> 
                                       </div> 
                                     </div> 
                                 </div>
@@ -225,20 +247,7 @@ select option[disabled] {
                                             Received Date<span class="asteriskField">*</span> 
                                         </label> 
                                         <div class="controls "> 
-                                            <input class="textinput textInput form-control" id="id_received_date" name="received_date" type="date" value="2017-12-21"> 
-                                        </div> 
-                                    </div> 
-                                </div>
-                            </div>
-                            
-                            <div class="row"> 
-                                <div class="col-sm-10"> 
-                                    <div id="div_id_received_time" class="form-group"> 
-                                        <label for="id_received_time" class="control-label  requiredField">
-                                            Received Time<span class="asteriskField">*</span> 
-                                        </label> 
-                                        <div class="controls "> 
-                                            <input class="textinput textInput form-control" id="id_received_time" name="received_time" type="time" value="11:11"> 
+                                            <input class="textinput textInput form-control" id="id_received_date" name="received" type="datetime-local" value="2017-06-01T08:30"> 
                                         </div> 
                                     </div> 
                                 </div>
@@ -261,8 +270,13 @@ select option[disabled] {
                 <div class="row">
                     <div class="col-md-12">
                         <!-- BEGIN PORTLET -->
-                        {% block portlet %}
-                        {% endblock %}
+                        {% if form.errors %}
+                            {{ form.errors }}
+                        {% else %}
+                            {% block portlet %}
+                            
+                            {% endblock %}
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -276,10 +290,11 @@ select option[disabled] {
     <script>
         var current_date = new Date() 
         var date_string = current_date.getFullYear() + '-' + ('0' + (current_date.getMonth()+1)).slice(-2) + '-' + ('0' + current_date.getDate()).slice(-2);
+        var duedate_string = current_date.getFullYear() + '-' + ('0' + (current_date.getMonth()+1)).slice(-2) + '-' + ('0' + current_date.getDate()).slice(-2)+"T"+"23:59";
         var time_string = ('0' + (current_date.getHours())).slice(-2) + ':' + ('0' + current_date.getMinutes()).slice(-2);
-        document.getElementById('id_date_due').value = date_string;
-        document.getElementById('id_received_date').value = date_string;
-        document.getElementById('id_received_time').value = time_string;
+        var full_datetime_string = date_string+"T"+time_string
+        document.getElementById('id_date_due').value = duedate_string;
+        document.getElementById('id_received_date').value = full_datetime_string;
         $( "#id_team" ).change(function() {
             team_id = $( "#id_team option:selected" ).val()
             $(".option_type").prop('disabled', true);
@@ -290,6 +305,23 @@ select option[disabled] {
             $("."+team_id+"_type").prop('disabled', false);
             $("."+team_id+"_user").prop('disabled', false);
         });
+        
+        function switchMultipleAgent() {
+            $("#show_multiple_agent").addClass("hidden");
+            $("#id_agent").addClass("hidden");
+            $("#id_agent").attr('disabled', true);
+            $("#id_multiple_agent").attr("disabled", false);
+            $("#id_multiple_agent").removeClass("hidden");
+            $("#show_single_agent").removeClass("hidden");
+        }
+        function switchSingleAgent() {
+            $("#id_multiple_agent").addClass("hidden");
+            $("#id_multiple_agent").attr("disabled", true);
+            $("#show_single_agent").addClass("hidden")
+            $("#show_multiple_agent").removeClass("hidden");
+            $("#id_agent").attr('disabled', false);
+            $("#id_agent").removeClass("hidden");
+        }
     </script>
     
     {% block track_scripts %}
