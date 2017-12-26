@@ -110,27 +110,44 @@ class Event(models.Model):
         start_activity = None
         stop_activity = None
         duration = None
+        compute = True
         
         if Activity.objects.filter(event=self.id).exists():
             activity_set = Activity.objects.filter(event=self.id).order_by('date')
+            last_activity = activity_set.first()
             print 'Found Activity! ' + str(len(activity_set)) 
             for activity in activity_set:
                 if activity.action.start_event:
-                    print 'Saw activity %s' % (activity.action.name)
-                    start_activity = activity.date
-                    print 'Start: ' + str(start_activity)
+                    print activity.action.name
+                    # print 'Saw activity %s' % (activity.action.name)
+                    if last_activity.action.stop_event or last_activity.action.pause_event:
+                        start_activity = activity.date
+                        last_activity = activity
+                    else:
+                        last_activity = activity
+                    # print 'Start: ' + str(start_activity)
                 elif activity.action.stop_event or activity.action.pause_event:
-                    print 'Saw activity %s' % (activity.action.name)
-                    stop_activity = activity.date
-                    print 'Stop: ' + str(stop_activity)
+                    # print 'Saw activity %s' % (activity.action.name)
+                    print activity.action.name
+                    if last_activity.action.start_event:
+                        stop_activity = activity.date
+                        last_activity = activity
+                        compute = True
+                    else:
+                        last_activity = activity
+                        compute = False
+                    print compute
+                    # print 'Stop: ' + str(stop_activity)
                     # If event started with a stop event don't do any calculations 
                     try:
-                        latest_duration = stop_activity - start_activity
-                        if duration is None:
-                            duration = latest_duration
-                        else:
-                            duration = duration + latest_duration
-                        print 'Duration: ' + str(duration)
+                        if compute:
+                            print 'Computing!'
+                            latest_duration = stop_activity - start_activity
+                            if duration is None:
+                                duration = latest_duration
+                            else:
+                                duration = duration + latest_duration
+                            print 'Duration: ' + str(duration)
                     except TypeError:
                         print "No Calculations Done!"
                 else:
