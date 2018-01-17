@@ -1,4 +1,5 @@
 {% extends 'tracker/index.html' %}
+{% load crispy_forms_tags %}
   
     {% block content %}
     
@@ -21,7 +22,12 @@
     {% include 'tracker/misc/paginator.html' with objects=events only %}
       
     {% endblock content %}
-           
+    
+    {% block form %}
+        <form action="{% url 'new_submit' 'team' %}" method="post">
+            {% crispy form %}
+        </form>
+    {% endblock form %}
     {% block teams %}
     
     {% for team in teams %}

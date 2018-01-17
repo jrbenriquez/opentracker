@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as AuthUserAdmin
-from tracker.models import Event, User, Team, Status, Type, Ticket, Activity
+from tracker.models import Event, User, Team, Status, Type, Ticket, Activity, LabelTag, LabelValue
 from tracker.forms import TrackerUserChangeForm, TrackerUserCreationForm
 
 # Register your models here.
@@ -32,3 +32,5 @@ admin.site.register(Status)
 admin.site.register(Type)
 admin.site.register(Ticket)
 admin.site.register(Activity, ActivityAdmin)
+admin.site.register(LabelTag)
+admin.site.register(LabelValue)

@@ -1,0 +1,20 @@
+{% extends 'tracker/theme/base.html' %}
+{% load staticfiles %}
+
+{% block title %}Home{% endblock %}
+
+{% block page_content %}
+    <h2>Welcome to Ops Tracker!</h2>
+
+    {% if user.is_superuser %}
+    <a href="{% url 'register' %}" class="forgot-password">Create an account.</a>
+    {% endif %}
+{% endblock page_content %}
+
+{% block post_scripts %}
+<script type="text/javascript">
+$(document).ready(function() {
+	$(".home").addClass('active');
+});
+</script>
+{% endblock %}

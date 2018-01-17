@@ -1,0 +1,125 @@
+{% extends 'tracker/theme/base.html' %}
+{% load staticfiles %}
+{% load humanize %}
+{% load crispy_forms_tags %}
+
+{% block css_plugins %}
+<link href="{% static 'assets/pages/css/profile.css' %}" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block css %}
+<style>
+.profile-desc-link span {
+  line-height: 1.6;
+}
+.profile-desc-link span:nth-child(2) {
+  float: right;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 70%;
+}
+.profile-desc-link div {
+    float: right;
+}
+.circle-small {
+  border-radius: 25px!important;
+  border: 1px solid #FFF;
+  box-shadow: 0 0 2px #888;
+  height: 20px;
+  width: 20px;
+}
+.circle {
+  border: 1px solid #FFF;
+  box-shadow: 0 0 2px #888;
+  height: 34px;
+  width: 34px;
+  font: 10px italic;
+}
+.c-section {
+	margin-bottom: 15px;
+}
+.c-section > h3 {
+    font-size: 26px;
+    margin: 0 0 30px;
+    text-transform: uppercase;
+}
+.c-section > .c-content-label {
+    display: inline;
+    padding: 3px 7px;
+    color: #fff;
+}
+.c-section > p {
+	margin-top: 20px !important;
+	font-size: 16px;
+    line-height: 24px;
+    color: #7f8c97;
+    font-weight: 300;
+    padding-right: 50px;
+}
+</style>
+{% endblock %}
+
+{% block page_head %}
+<!-- BEGIN PAGE TITLE -->
+<div class="page-title">
+    <h1>Account
+        <small>Update user profile and manage financial accounts</small>
+    </h1>
+</div>
+<!-- END PAGE TITLE -->
+{% endblock %}
+
+{% block page_content %}
+{% block breadcrumb %}
+{% endblock %}
+<div class="page-content-inner">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- BEGIN PROFILE SIDEBAR -->
+            <div class="profile-sidebar">
+                <!-- PORTLET MAIN -->
+                <div class="portlet light profile-sidebar-portlet ">
+                    <!-- SIDEBAR USERPIC -->
+                    <div class="profile-userpic">
+                        <div class="user user-pic-big" style="background-image:url('/static/assets/pages/img/dashboard/profile_default.jpg')"></div>
+                    </div>
+                    <!-- END SIDEBAR USERPIC -->
+                    <!-- SIDEBAR USER TITLE -->
+                    <div class="profile-usertitle">
+                        <div class="profile-usertitle-name"> {{ user.full_name }} </div>
+                        <div class="profile-usertitle-job"> Date Joined: {{ user.joined|date }}</div>
+                    </div>
+                    <!-- END SIDEBAR USER TITLE -->
+                    <div class="profile-usermenu">
+                        <ul class="nav">
+                            <li class="account-personal">
+                                <a href="{% url 'home' %}">
+                                    <i class="icon-home"></i> Personal Info </a>
+                            </li>
+                            <li class="account-profile">
+                                <a href="{% url 'home' %}">
+                                    <i class="icon-home"></i> Profile </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- END PORTLET MAIN -->
+                
+            </div>
+            
+            <!-- END BEGIN PROFILE SIDEBAR -->
+            <!-- BEGIN PROFILE CONTENT -->
+            <div class="profile-content">
+                <div class="row">
+                    <div class="col-md-12">
+                        <!-- BEGIN PORTLET -->
+                        {% block portlet %}
+                        {% endblock %}
+                    </div>
+                </div>
+            </div>
+            <!-- END PROFILE CONTENT -->
+        </div>
+    </div>
+</div>
+{% endblock %}

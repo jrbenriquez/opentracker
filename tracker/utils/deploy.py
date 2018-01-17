@@ -17,6 +17,27 @@ def post_deploy_setup():
             'stop_event':  False,
             'default': False,
         },
+        'For QA': {
+            'code': 'FQA',
+            'start_event': False ,
+            'pause_event': True,
+            'stop_event':  False,
+            'default': False,
+        },
+        'QA Revision': {
+            'code': 'QAREV',
+            'start_event': False ,
+            'pause_event': True,
+            'stop_event':  False,
+            'default': False,
+        },
+        'QA Passed': {
+            'code': 'QAPAS',
+            'start_event': False ,
+            'pause_event': True,
+            'stop_event':  False,
+            'default': False,
+        },
         'Done': {
             'code': 'D',
             'start_event': False ,

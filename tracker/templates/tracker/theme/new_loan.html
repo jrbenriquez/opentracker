@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load humanize %}
+
+{% block title %}Request New Loan{% endblock %}
+
+{% block css_plugins %}
+<link href="{% static 'assets/pages/css/profile.css' %}" rel="stylesheet" type="text/css" />
+{% endblock %}
+
+{% block css %}
+<style>
+.profile-desc-link span {
+  line-height: 1.6;
+}
+.profile-desc-link span:nth-child(2) {
+  float: right;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 70%;
+}
+.profile-desc-link div {
+    float: right;
+}
+.circle-small {
+  border-radius: 25px!important;
+  border: 1px solid #FFF;
+  box-shadow: 0 0 2px #888;
+  height: 20px;
+  width: 20px;
+}
+.circle {
+  border: 1px solid #FFF;
+  box-shadow: 0 0 2px #888;
+  height: 34px;
+  width: 34px;
+  font: 10px italic;
+}
+.c-section {
+    margin-bottom: 15px;
+}
+.c-section > h3 {
+    font-size: 26px;
+    margin: 0 0 30px;
+    text-transform: uppercase;
+}
+.c-section > .c-content-label {
+    display: inline;
+    padding: 3px 7px;
+    color: #fff;
+}
+.c-section > p {
+    margin-top: 20px !important;
+    font-size: 16px;
+    line-height: 24px;
+    color: #7f8c97;
+    font-weight: 300;
+    padding-right: 50px;
+}
+</style>
+{% endblock %}
+
+{% block page_head %}
+<!-- BEGIN PAGE TITLE -->
+<div class="page-title">
+    <h1>New Loan
+        <small>Request a loan to your company</small>
+    </h1>
+</div>
+<!-- END PAGE TITLE -->
+{% endblock %}
+
+{% block page_content %}
+<ul class="page-breadcrumb breadcrumb">
+    <li>
+        <a href="{% url 'account:home' %}">Home</a>
+        <i class="fa fa-circle"></i>
+    </li>
+    <li>
+        <span>Request New Loan</span>
+    </li>
+</ul>
+<div class="page-content-inner">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- BEGIN PROFILE SIDEBAR -->
+            <div class="profile-sidebar">
+                <!-- PORTLET MAIN -->
+                <div class="portlet light profile-sidebar-portlet ">
+                    <!-- SIDEBAR USERPIC -->
+                    <div class="profile-userpic">
+                        <div class="user user-pic-big" style="background-image:url('/static/assets/pages/img/dashboard/profile_default.jpg')"></div>
+                    </div>
+                    <!-- END SIDEBAR USERPIC -->
+                    <!-- SIDEBAR USER TITLE -->
+                    <div class="profile-usertitle">
+                        <div class="profile-usertitle-name"> {{ user.individual.full_name }} </div>
+                        <div class="profile-usertitle-job"> Date Joined: {{ user.joined|date }}</div>
+                    </div>
+                    <!-- END SIDEBAR USER TITLE -->
+                    <div class="profile-usermenu">
+                    </div>
+                </div>
+                <!-- END PORTLET MAIN -->
+            </div>
+            <!-- END BEGIN PROFILE SIDEBAR -->
+            <!-- BEGIN PROFILE CONTENT -->
+            <div class="profile-content">
+                <div class="row">
+                    <div class="col-md-12">
+                        <!-- BEGIN PORTLET -->
+                        <div class="portlet light">
+                            <div class="portlet-title">
+                                <div class="caption">
+                                    <span class="caption-subject font-blue-madison bold uppercase">Request New Loan</span>
+                                </div>
+                            </div>
+                            <div class="portlet-body form">
+                                <form role="form" class="form-horizontal" method="post">
+                                    {% csrf_token %}
+                                    <div class="form-body">
+                                        <div class="form-group">
+                                            <label class="control-label col-md-3">Loan Amount</label>
+                                            <div class="col-md-7">
+                                                <input type="number" name="amount", class="form-control""> </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="control-label col-md-3">Installment (Months)</label>
+                                            <div class="col-md-7">
+                                                <input type="number" name="installments", class="form-control"> </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-actions">
+                                            <div class="row">
+                                            <div class="col-md-offset-3 col-md-9">
+                                                <button type="submit" class="btn green">Request Loan</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <!-- END PORTLET -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END PROFILE CONTENT -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block post_scripts %}
+<script type="text/javascript">
+$(document).ready(function() {
+    $('form').submit(function(){
+        alert('The system or the Manager will review this loan before approval.')
+    });
+});
+</script>
+{% endblock %}

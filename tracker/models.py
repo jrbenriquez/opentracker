@@ -93,6 +93,9 @@ class Event(models.Model):
     team = models.ForeignKey(Team)
     duration = models.DurationField(null=True, blank=True)
     received = models.DateTimeField(null=True, blank=True)
+    additional_details = models.CharField(max_length=512, null=True, blank=True)
+    #used for group tasks
+    relates_to = models.ForeignKey('self', null=True, blank=True)
     
     def __str__(self):
         return '[%s] %s - %s' % (self.id, self.ticket_name, self.task_type)
@@ -107,33 +110,72 @@ class Event(models.Model):
         start_activity = None
         stop_activity = None
         duration = None
+        compute = True
         
         if Activity.objects.filter(event=self.id).exists():
             activity_set = Activity.objects.filter(event=self.id).order_by('date')
+            last_activity = activity_set.first()
             print 'Found Activity! ' + str(len(activity_set)) 
             for activity in activity_set:
-                if activity.action.start_event:
-                    print 'Saw activity %s' % (activity.action.name)
+                if activity == last_activity:
                     start_activity = activity.date
-                    print 'Start: ' + str(start_activity)
+                if activity.action.start_event:
+                    print activity.action.name
+                    # print 'Saw activity %s' % (activity.action.name)
+                    if last_activity.action.stop_event or last_activity.action.pause_event:
+                        start_activity = activity.date
+                        last_activity = activity
+                    else:
+                        last_activity = activity
+                    # print 'Start: ' + str(start_activity)
                 elif activity.action.stop_event or activity.action.pause_event:
-                    print 'Saw activity %s' % (activity.action.name)
-                    stop_activity = activity.date
-                    print 'Stop: ' + str(stop_activity)
+                    # print 'Saw activity %s' % (activity.action.name)
+                    print activity.action.name
+                    if last_activity.action.start_event:
+                        stop_activity = activity.date
+                        last_activity = activity
+                        compute = True
+                        print start_activity
+                        print stop_activity
+                    else:
+                        last_activity = activity
+                        compute = False
+                    print compute
+                    # print 'Stop: ' + str(stop_activity)
                     # If event started with a stop event don't do any calculations 
                     try:
-                        latest_duration = stop_activity - start_activity
-                        if duration is None:
-                            duration = latest_duration
-                        else:
-                            duration = duration + latest_duration
-                        print 'Duration: ' + str(duration)
-                    except TypeError:
+                        if compute:
+                            print 'Computing!'
+                            print 'START:' + str(start_activity)
+                            print 'STOP:' + str(stop_activity)
+                            latest_duration = stop_activity - start_activity
+                            if duration is None:
+                                duration = latest_duration
+                            else:
+                                duration = duration + latest_duration
+                            print 'Duration: ' + str(duration)
+                    except TypeError as e:
+                        print e
                         print "No Calculations Done!"
                 else:
                     pass
         return duration
         
+
+class LabelTag(models.Model):
+    name = models.CharField(max_length=128, unique=True)
+    event = models.ManyToManyField(Event)
+    
+    def __str__(self):
+        return self.name
+
+class LabelValue(models.Model):
+    tag = models.ForeignKey(LabelTag)
+    event = models.ManyToManyField(Event)
+    value = models.CharField(max_length=128)
+    
+    def __str__(self):
+        return self.value
 
 class Ticket(models.Model):
     name = models.CharField(max_length=500)
