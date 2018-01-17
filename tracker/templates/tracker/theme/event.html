@@ -48,9 +48,6 @@
                 <a href="#tab_1_1" data-toggle="tab">Info</a>
             </li>
             <li>
-                <a href="#tab_1_2" data-toggle="tab">Labels</a>
-            </li>
-            <li>
                 <a href="#tab_1_4" data-toggle="tab">Comments</a>
             </li>
         </ul>
@@ -174,6 +171,43 @@
                                     </form>
                                 </span>
                             </div>
+                            <div class="row">
+                <div class='col-md-12'>
+                    <div class="form-group">
+                        <p><span id="add-label"><a href="javascript:void(0)">Add Label</a></span></p>
+                        <div id="add-label-form" class='hidden'>
+                            <form action="{% url 'event' event.id %}" method="post">
+                                {% csrf_token %}
+                                <label for="label-tag">Name:</label>
+                                <input  type="hidden" name="action" value="add-label">
+                                <input  name="label-tag" list="available-labels">
+                                <datalist id="available-labels">
+                                    {% for label in labels %}
+                                    <option value=label.name>
+                                    {% endfor %}
+                                    <option value="test">
+                                </datalist>
+                                <label for="label-value">Value:</label>
+                                <input type="text" name="label-value"></input>
+                                <input type="submit" value="Add Label">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                    
+                {% if labels %}
+                    {% for tag, value in labels.items %}
+                        <div class='col-md-12'>
+                            <div class='col-md-2'>
+                                <p><span class="label label-info">{{ tag }}</p></span>
+                            </div>
+                            <div class='col-md-4'>
+                                <p>{{ value }}</p></span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
                         </div>
                         <p>.</p>
                     </div>
@@ -181,47 +215,8 @@
                 </div>
               </div>
                 <!-- END FORM-->
-            </div>
-            <div class="tab-pane" id="tab_1_2">
-                <div class="row">
-                    <div class='col-md-12'>
-                        <div class="form-group">
-                            <p><span id="add-label"><a href="javascript:void(0)">Add Label</a></span></p>
-                            <div id="add-label-form" class='hidden'>
-                                <form action="{% url 'event' event.id %}" method="post">
-                                    {% csrf_token %}
-                                        <label for="label-tag">Name:</label>
-                                        <input  type="hidden" name="action" value="add-label">
-                                        <input  name="label-tag" list="available-labels">
-                                        <datalist id="available-labels">
-                                        {% for label in labels %}
-                                        <option value=label.name>
-                                        {% endfor %}
-                                        <option value="test">
-                                    </datalist>
-                                    <label for="label-value">Value:</label>
-                                    <input type="text" name="label-value"></input>
-                                    <input type="submit" value="Add Label">
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    {% if labels %}
-                        {% for tag, value in labels.items %}
-                    <div class='col-md-12'>
-                        <div class='col-md-2'>
-                            <p><span class="label label-info">{{ tag }}</p></span>
-                        </div>
-                        <div class='col-md-4'>
-                            <p>{{ value }}</p></span>
-                        </div>
-                    </div>
-                    {% endfor %}
-                    {% endif %}
-                </div>
-            </div>
             
+        </div>
                 
             <div class="tab-pane" id="tab_1_4">
                 Load Comments Here
