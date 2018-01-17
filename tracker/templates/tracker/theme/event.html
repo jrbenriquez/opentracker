@@ -63,43 +63,37 @@
                 <div class="row">
                 <div class="col-xs-12 col-md-12"><h3>{{ event.ticket_name }}</h3></div>
                 <div class="col-xs-12 col-md-12">
+                    <form id="status_change" action="{% url 'event' event.id %}" method="post" class="form-inline">
+                        <div class="controls ">
+                            {% csrf_token %}
+                            <input  type="hidden" name="action" value="status-change">
+                            <select class="select form-control select-action" id="status_select" name="status">
+                                {% for status in data.statuses %}
+                                    {% if status == event.status %}
+                                        <option value="{{ status.id }}" selected='selected'>{{ status.name }}</option>
+                                    {% else %}
+                                        {% if event.status.stop_event %}
+                                          {% if not status.pause_event %}
+                                            <option value="{{ status.id }}">{{ status.name }}</option>
+                                          {% endif %}
+                                        
+                                        {% elif event.status.pause_event %}
+                                          {% if not status.stop_event %}
+                                            <option value="{{ status.id }}">{{ status.name }}</option>
+                                          {% endif %}
+                                        
+                                        {% else %}
+                                          <option value="{{ status.id }}">{{ status.name }}</option>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-xs-12 col-md-12">
                   <div class="thumbnail">
                       <div class="caption">
-                        <div class='col-xs-12'>
-                            {% if event.status.pause_event %}
-                                {% for s in status_start %}
-                                    <form id="form_event_start_{{ event.id }}_{{ s.id }}" action="{% url 'event' event.id %}" method="post">
-                                                 {% csrf_token %}
-                                                <input type="hidden" value="{{ event.id }}" name="event" />
-                                                <input type="hidden" value="start" name="action" />
-                                                <input type="hidden" value="" name="activity"/>
-                                         </form>
-                                        <span onClick="startEvent({{ event.id }}, {{ s.id }})" class="action-icon-start glyphicon glyphicon-play btn btn-lg" aria-hidden="true"></span>
-                                {% endfor %}
-                            {% elif event.status.start_event %}
-                                {% for s in status_pause %}
-                                    <form id="form_event_pause_{{ event.id }}_{{ s.id }}" action="{% url 'event' event.id %}" method="post">
-                                                 {% csrf_token %}
-                                                <input type="hidden" value="{{ event.id }}" name="event" />
-                                                <input type="hidden" value="pause" name="action" />
-                                                <input type="hidden" value="" name="activity"/>
-                                         </form>
-                                        <span onClick="pauseEvent({{ event.id }}, {{ s.id }})" class="btn action-icon-pause glyphicon glyphicon-pause btn-lg"></span>
-                                {% endfor %}
-                                
-                                {% for s in status_stop %}
-                                        <span onClick="stopEvent({{ event.id }}, {{ s.id }})" style="font-size: 50px; padding-top: 0.05em;" class="btn glyphicon glyphicon-ok pull-right text-primary"></span>
-                                    <form id="form_event_stop_{{ event.id }}_{{ s.id }}" action="{% url 'event' event.id %}" method="post">
-                                                 {% csrf_token %}
-                                                <input type="hidden" value="{{ event.id }}" name="event" />
-                                                <input type="hidden" value="stop" name="action" />
-                                                <input type="hidden" value="" name="activity"/>
-                                         </form>
-                                   
-                            {% endfor %}
-            
-                            {% endif %}
-                        </div>
                         <div class='col-xs-12 well'>
                             <h4>{{ event.unique_identifier }}</h4> 
                         </div>
@@ -170,7 +164,15 @@
                                 <p><span class="event-label">Quantity</p></span>
                             </div>
                             <div class='col-md-4'>
-                                <p><span class="label label-info">{{ event.quantity }}</p></span>
+                                <span id="qty_label" class="label label-info">{{ event.quantity }}</span>
+                                <span id="qty_label_input" class="hidden">
+                                    <form id="qty_change" action="{% url 'event' event.id %}" method="post" class="form-inline">
+                                        {% csrf_token %}
+                                        <input  type="hidden" name="action" value="qty-change">
+                                        <input type="number" name="quantity" min="1" max="999999">
+                                        <input type="submit" value="Change">
+                                    </form>
+                                </span>
                             </div>
                         </div>
                         <p>.</p>
@@ -247,5 +249,17 @@ $( "#add-label" ).click(function() {
             $("#add-label").addClass('hidden');
             $("#add-label-form").removeClass('hidden');
         });
+        
+$( "#qty_label" ).click(function() {
+        $("#qty_label").addClass('hidden')
+        $("#qty_label_input").removeClass('hidden')
+})
+
+$( "#status_select" ).change(function() {
+    action_id = $(this).val()
+    event = $(this).attr('id').split('_')[0]
+    $("#status_change").submit()
+});
+        
 </script>
 {% endblock %}

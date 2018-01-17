@@ -117,6 +117,8 @@ class Event(models.Model):
             last_activity = activity_set.first()
             print 'Found Activity! ' + str(len(activity_set)) 
             for activity in activity_set:
+                if activity == last_activity:
+                    start_activity = activity.date
                 if activity.action.start_event:
                     print activity.action.name
                     # print 'Saw activity %s' % (activity.action.name)
@@ -133,6 +135,8 @@ class Event(models.Model):
                         stop_activity = activity.date
                         last_activity = activity
                         compute = True
+                        print start_activity
+                        print stop_activity
                     else:
                         last_activity = activity
                         compute = False
@@ -142,13 +146,16 @@ class Event(models.Model):
                     try:
                         if compute:
                             print 'Computing!'
+                            print 'START:' + str(start_activity)
+                            print 'STOP:' + str(stop_activity)
                             latest_duration = stop_activity - start_activity
                             if duration is None:
                                 duration = latest_duration
                             else:
                                 duration = duration + latest_duration
                             print 'Duration: ' + str(duration)
-                    except TypeError:
+                    except TypeError as e:
+                        print e
                         print "No Calculations Done!"
                 else:
                     pass

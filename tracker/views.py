@@ -377,7 +377,26 @@ def event(request, event_id):
     # Then Best practice: Convert all views to Generic View
     print request.POST
     if request.method == 'POST':
-        if request.POST.get('action') == 'start':
+        if request.POST.get('action') == 'status-change':
+            
+            status_data = dict(request.POST)
+            event_dict = {}
+            reference_status = None
+            action_status = None
+            #Get Event that needs to be changed
+            event = Event.objects.filter(pk=event_id)[0]
+            action_status = int(status_data['status'][0])
+            reference_status = int(event.status.id)
+            
+            if action_status != reference_status:
+                new_status = Status.objects.get(pk=action_status)
+                if new_status.start_event:
+                    start_event(event, new_status)
+                elif new_status.stop_event:
+                    stop_event(event, new_status)
+                elif new_status.pause_event:
+                    pause_event(event, new_status)
+        elif request.POST.get('action') == 'start':
             start_event(request)
         elif request.POST.get('action') == 'stop':
             stop_event(request)
@@ -385,14 +404,16 @@ def event(request, event_id):
             pause_event(request)
         elif request.POST.get('action') == 'add-label':
             create_label(request, event_id)
+        elif request.POST.get('action') == 'qty-change':
+            quantity = request.POST.get('quantity')
+            event = Event.objects.filter(pk=event_id)
+            event.update(quantity=quantity)
     form = EventForm()
     event = Event.objects.get(pk=event_id)
     labels = {}
     for label_value in LabelValue.objects.filter(event=event_id):
         labels[label_value.tag.name] = label_value.value
-    status_start = Status.objects.filter(start_event=True)
-    status_stop = Status.objects.filter(stop_event=True)
-    status_pause = Status.objects.filter(pause_event=True)
+    statuses = Status.objects.all()
     teams = Team.objects.order_by('id')
     users = User.objects.order_by('username')
     types = Type.objects.order_by('id')
@@ -400,13 +421,11 @@ def event(request, event_id):
         'teams': teams,
         'users': users,
         'types': types,
+        'statuses': statuses,
         }
     context = {
             'form': form,
             'event': event,
-            'status_start': status_start,
-            'status_stop': status_stop,
-            'status_pause': status_pause,
             'teams': teams,
             'users': users,
             'parent_page': 'home',

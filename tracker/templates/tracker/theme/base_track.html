@@ -149,7 +149,13 @@ select option[disabled] {
                                                     {% for team in data.teams %}
                                                         <span id="{{ team.id }}_users">
                                                         {% for agent in data.users %}
-                                                            {% if agent.team == team %}
+                                                            {% if team.name == "Others" %}
+                                                                {% if agent.username == user.username %}
+                                                                    <option value="{{ agent.id }}" class="option_user {{ team.id }}_user" disabled>{{ agent.username }}</option>
+                                                                {% else %}
+                                                                    <option value="{{ agent.id }}" class="option_user {{ team.id }}_user" disabled>{{ agent.username }}</option>
+                                                                {% endif %}
+                                                            {% elif agent.team == team %}
                                                                 {% if agent.username == user.username %}
                                                                     <option value="{{ agent.id }}" class="default_user option_user {{ team.id }}_user" selected='selected'>{{ agent.username }}</option>
                                                                 {% else %}
@@ -168,7 +174,13 @@ select option[disabled] {
                                                         {% for team in data.teams %}
                                                             <span id="{{ team.id }}_users">
                                                             {% for agent in data.users %}
-                                                                {% if agent.team == team %}
+                                                                {% if team.name == "Others" %}
+                                                                    {% if agent.username == user.username %}
+                                                                    <option value="{{ agent.id }}" class="option_user {{ team.id }}_user" disabled>{{ agent.username }}</option>
+                                                                    {% else %}
+                                                                        <option value="{{ agent.id }}" class="option_user {{ team.id }}_user" disabled>{{ agent.username }}</option>
+                                                                    {% endif %}
+                                                                {% elif agent.team == team %}
                                                                     {% if agent.username == user.username %}
                                                                         <option value="{{ agent.id }}" class="default_user option_user {{ team.id }}_user" selected='selected'>{{ agent.username }}</option>
                                                                     {% else %}
