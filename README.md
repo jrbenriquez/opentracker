@@ -2,7 +2,7 @@ Ops Tracker v0.1.0
 
 A web tracking app specifically made for a team but still can be applied and used by any team in general.
 
-Who is this app for:
+Who this app is for:
 
 Mainly BPO businesses and speecifically Supervisors/Team Leads/POC's who manage a team 
 that does process outsourced tasks wherein every task has to be tracked (BPO)
@@ -11,7 +11,7 @@ What this app provides:
 
 1. Platform for entering tasks which are named as Events
 2. Reports showing the overview of the tasks done on the platform
-3. User accounts for the user which are need to access the platform
+3. User accounts for the user which are needed to access the platform
 
 What's left to do:
 
@@ -22,6 +22,9 @@ Feature developments are only to be added if it's a general feature
 
 =============================================================================
 CLOUD 9 IDE ReadME - Leaving this here 
+========================================================================
+
+
      ,-----.,--.                  ,--. ,---.   ,--.,------.  ,------.
     '  .--./|  | ,---. ,--.,--. ,-|  || o   \  |  ||  .-.  \ |  .---'
     |  |    |  || .-. ||  ||  |' .-. |`..'  |  |  ||  |  \  :|  `--, 
