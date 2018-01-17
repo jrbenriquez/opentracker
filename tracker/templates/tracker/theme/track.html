@@ -44,14 +44,16 @@
         </div>
         <ul class="nav nav-tabs">
             <li class="active">
-                <a href="#tab_1_1" data-toggle="tab">Personal Info</a>
+                <a href="#tab_1_1" data-toggle="tab">Events</a>
             </li>
+            <!-- I f ever you need additional tabs. Edit na lang to 
             <li>
                 <a href="#tab_1_2" data-toggle="tab">Documents</a>
             </li>
             <li>
                 <a href="#tab_1_4" data-toggle="tab">Change Password</a>
             </li>
+            -->
         </ul>
     </div>
     <div class="portlet-body">
@@ -63,6 +65,7 @@
                 {% include 'tracker/misc/paginator.html' with objects=events only %}
                 <!-- END FORM-->
             </div>
+            <!-- Commenting this out for code brevity. Di naman ginagamit
             <div class="tab-pane" id="tab_1_2">
                 <form id="form-requirements" class="form-horizontal" method="post">
                     {% csrf_token %}
@@ -209,7 +212,7 @@
                         </div>
                     </div>
                 </form>
-            </div>
+            </div> -->
         </div>
     </div>
     <!-- END PORTLET -->
