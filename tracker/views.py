@@ -52,7 +52,7 @@ def create_event(form):
         # Combine Received Date and time -> ToDo : Edit form to pass both Datetime (datetime-local)
         received = form.cleaned_data['received']
         if Ticket.objects.filter(unique_identifier=unique_identifier).exists():
-            ticket_name = Ticket.objects.get(unique_identifier=unique_identifier)
+            ticket_name = Ticket.objects.get(unique_identifier=unique_identifier).name
         else:
             ticket = Ticket.objects.create(
                 name = ticket_name,
